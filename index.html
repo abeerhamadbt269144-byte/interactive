@@ -1,0 +1,1551 @@
+
+8086-interactive-4.html
+100%
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>8086 تفاعلي – العنونة وInstruction Set</title>
+<style>
+:root{
+  --bg:#f5f6fb; --card:#fff; --ink:#1d2433; --mut:#667085; --line:#d9dce8;
+  --pri:#3b5bdb; --pri-d:#2b45b0; --pink:#e8195f; --ok:#12a150; --okbg:#d3f9d8;
+  --warn:#f59f00; --warnbg:#fff3bf; --bad:#e03131; --badbg:#ffe3e3; --wr:#e8590c; --wrbg:#ffe8cc;
+}
+*{box-sizing:border-box}
+html{font-size:18px}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Tahoma,"Segoe UI",system-ui,-apple-system,sans-serif;line-height:1.7}
+code,.c,input.ins,.mono{font-family:ui-monospace,"Cascadia Mono",Consolas,monospace}
+.c{direction:ltr;unicode-bidi:isolate;display:inline-block;background:#eef1ff;color:#24308a;padding:0 .4em;border-radius:6px;font-weight:600}
+.layout{display:flex;min-height:100vh}
+aside{width:262px;flex:none;background:var(--card);border-left:1px solid var(--line);position:sticky;top:0;height:100vh;overflow:auto;padding:16px 10px}
+aside h1{font-size:1.05rem;margin:0 8px 2px;color:var(--pink)}
+aside .sub{font-size:.75rem;color:var(--mut);margin:0 8px 12px}
+aside .grp{font-size:.72rem;letter-spacing:.04em;color:var(--mut);margin:14px 10px 4px;font-weight:700}
+aside button{display:block;width:100%;text-align:right;background:none;border:0;border-radius:10px;padding:8px 12px;font:inherit;font-size:.9rem;color:var(--ink);cursor:pointer}
+aside button:hover{background:#eef1ff}
+aside button.on{background:var(--pri);color:#fff}
+main{flex:1;min-width:0;padding:26px 34px 60px;max-width:1240px}
+h2{margin:0 0 4px;font-size:1.55rem;color:var(--pink)}
+h3{margin:18px 0 6px;font-size:1.1rem}
+.lead{color:var(--mut);margin:0 0 16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px 18px;margin:14px 0}
+.card.soft{background:#f0f4ff;border-color:#cdd7ff}
+.tag{display:inline-block;background:var(--pri);color:#fff;border-radius:999px;padding:0 .7em;font-size:.82rem;font-weight:700}
+.tag.g{background:var(--ok)}.tag.o{background:var(--wr)}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
+.btn{font:inherit;font-size:.95rem;border:0;border-radius:10px;padding:8px 16px;cursor:pointer;background:var(--pri);color:#fff;font-weight:700}
+.btn:hover{background:var(--pri-d)}
+.btn.sec{background:#e7eaf7;color:var(--ink)}.btn.sec:hover{background:#d8ddf2}
+.btn.ok{background:var(--ok)}
+.btn:disabled{opacity:.45;cursor:default}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+.chip{font:inherit;direction:ltr;font-family:ui-monospace,Consolas,monospace;font-size:.88rem;border:2px solid #c9d2ff;background:#fff;color:#24308a;border-radius:999px;padding:3px 14px;cursor:pointer;font-weight:600}
+.chip:hover{background:#eef1ff}
+.chip.bad{border-color:#ffb3b3;color:#b02525}.chip.bad:hover{background:var(--badbg)}
+.chip.good{border-color:#a5e0b5;color:#0b7a3b}.chip.good:hover{background:var(--okbg)}
+.ctl{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+input.ins{direction:ltr;text-align:left;flex:1;min-width:220px;font-size:1.1rem;padding:8px 12px;border:2px solid var(--line);border-radius:10px;background:#fff;color:var(--ink)}
+input.ins:focus,.reg input:focus,.fld:focus{outline:none;border-color:var(--pri)}
+.panels{display:grid;grid-template-columns:repeat(auto-fit,minmax(310px,1fr));gap:14px;margin-top:12px}
+.panel{background:#fbfbfe;border:1px solid var(--line);border-radius:14px;padding:10px 12px}
+.panel>.pt{font-size:.78rem;font-weight:800;color:var(--mut);margin-bottom:6px;letter-spacing:.04em;direction:ltr;text-align:left}
+.regs{display:flex;flex-wrap:wrap;gap:6px;direction:ltr}
+.reg{border:2px solid var(--line);border-radius:10px;padding:4px 8px;background:#fff;transition:all .2s}
+.reg .rn{font-size:.72rem;font-weight:800;color:var(--mut);text-align:center}
+.reg .cells{display:flex;gap:3px}
+.reg input{width:2.5em;text-align:center;font-family:ui-monospace,Consolas,monospace;font-size:1.1rem;font-weight:700;border:2px solid #e3e6f2;border-radius:6px;padding:2px 0;background:#fff;color:var(--ink)}
+.reg.w input{width:4.4em}
+.reg .hn{display:flex;gap:3px;font-size:.62rem;color:var(--mut);text-align:center}.reg .hn span{flex:1}
+.reg.hl{border-color:var(--warn);background:var(--warnbg);box-shadow:0 0 0 3px rgba(245,159,0,.25)}
+.reg input.hl{background:#ffe066;border-color:var(--warn)}
+.reg.fl,.reg input.fl,.fb.fl{animation:fl 1.6s ease-out}
+@keyframes fl{0%{background:#69db7c;transform:scale(1.07)}100%{transform:scale(1)}}
+.mem{display:flex;flex-wrap:wrap;gap:5px;direction:ltr}
+.mcell{min-width:56px;text-align:center;border:2px solid var(--line);border-radius:8px;background:#fff;padding:1px 3px}
+.mcell .ma{font-size:.62rem;color:var(--mut);font-family:ui-monospace,Consolas,monospace}
+.mcell .mv{font-size:1.1rem;font-weight:800;font-family:ui-monospace,Consolas,monospace}
+.mcell.empty .mv{color:#b9bfd3}
+.mcell.rd{border-color:var(--ok);background:var(--okbg)}.mcell.wr{border-color:var(--wr);background:var(--wrbg)}
+.mcell.fl{animation:fl 1.6s ease-out}
+.stk{direction:ltr;font-family:ui-monospace,Consolas,monospace}
+.srow{display:grid;grid-template-columns:58px 40px 112px auto;gap:6px;align-items:center;font-size:.8rem;margin:2px 0;white-space:nowrap}
+.srow .sv{text-align:center;border:2px solid var(--line);border-radius:8px;background:#fff;font-weight:800;padding:0 4px}
+.srow.tos .sv{border-color:var(--pri);background:#e7ecff}
+.srow .sv.rd{border-color:var(--ok);background:var(--okbg)}.srow .sv.wr{border-color:var(--wr);background:var(--wrbg)}
+.srow .mk{color:var(--pri);font-weight:800;font-family:Tahoma,sans-serif}
+.srow .sa{color:var(--mut)}
+.io{direction:ltr;display:flex;align-items:center;gap:6px;justify-content:center;flex-wrap:wrap}
+.io .bx{border:2px solid var(--line);border-radius:12px;background:#fff;padding:8px 12px;text-align:center;min-width:120px}
+.io .bx b{display:block;font-size:.8rem;color:var(--mut)}
+.io .bx .v{font-size:1.4rem;font-weight:800;font-family:ui-monospace,Consolas,monospace;min-height:2rem;color:var(--pri)}
+.io .bx.cpu{background:#eef3ff}.io .bx.pt{background:#f1e9ff}
+.io .ar{font-size:2.2rem;color:#c3c8dc;transition:all .3s}
+.io .ar.on{color:var(--ok);transform:scale(1.25)}
+.trace{margin-top:14px;display:flex;flex-direction:column;gap:8px}
+.st{display:flex;gap:10px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:8px 12px;animation:in .35s ease-out}
+.st .n{flex:none;width:28px;height:28px;border-radius:50%;background:#e7eaf7;color:var(--pri);font-weight:800;display:grid;place-items:center;font-size:.85rem;margin-top:2px}
+.st.cur{border-color:var(--pri);box-shadow:0 0 0 3px rgba(59,91,219,.15)}
+.st.cur .n{background:var(--pri);color:#fff}
+.st .tx{min-width:0}.st .tx .l{margin:2px 0}
+.st .tx b{color:#1b2a8f}
+.l.f{direction:ltr;text-align:left;font-family:ui-monospace,Consolas,monospace;font-size:.95rem}
+.fs{direction:ltr;unicode-bidi:isolate;display:inline-block;font-family:ui-monospace,Consolas,monospace}
+@keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.err{background:var(--badbg);border:2px solid #ffa8a8;border-radius:12px;padding:10px 14px;margin-top:12px}
+.err b.h{color:var(--bad)}
+.fix{margin-top:6px;color:#0b6b35}
+.done{background:var(--okbg);border:2px solid #8ce99a;border-radius:12px;padding:6px 14px;margin-top:4px;font-weight:700;color:#0b6b35}
+.mini{font-size:.82rem;color:var(--mut)}
+table.t{border-collapse:collapse;width:100%;font-size:.92rem}
+table.t th,table.t td{border:1px solid var(--line);padding:6px 10px;text-align:right}
+table.t th{background:#f0f2fa}
+section[dir=ltr] table.t th,section[dir=ltr] table.t td{text-align:left}
+.limit{border-radius:12px;border:2px solid #ffb3b3;background:#fff7f7;padding:10px 14px;margin:8px 0}
+.limit .row{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center}
+.pa-row{display:flex;gap:6px;direction:ltr;align-items:center;margin:8px 0;flex-wrap:wrap}
+.pa-row .lb{width:120px;font-weight:800;color:var(--mut);font-size:.85rem;text-align:left}
+.dg{width:54px;height:62px;border:2px solid var(--line);border-radius:10px;display:grid;place-items:center;font-size:1.7rem;font-weight:800;font-family:ui-monospace,Consolas,monospace;background:#fff}
+.dg.z{background:var(--warnbg);border-color:var(--warn)}
+.dg.r{background:var(--okbg);border-color:var(--ok);animation:in .5s}
+.dg.e{opacity:.15}
+.fld{font:inherit;font-size:1rem;border:2px solid var(--line);border-radius:8px;padding:4px 8px;background:#fff;direction:ltr;text-align:left;width:140px}
+select.fld{width:auto;direction:rtl}
+.fld.ok{border-color:var(--ok);background:var(--okbg)}.fld.no{border-color:var(--bad);background:var(--badbg)}
+.exq{border:1px solid var(--line);border-radius:14px;background:#fff;padding:12px 16px;margin:12px 0}
+.exq .fs{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px 14px;margin:10px 0}
+.exq label{display:block;font-size:.82rem;color:var(--mut);font-weight:700}
+.sol{background:#f4fff6;border:1px solid #b2e8c0;border-radius:10px;padding:8px 14px;margin-top:8px;direction:ltr;text-align:left}
+.opts{display:grid;gap:8px;margin:10px 0}
+.opt{text-align:right;font:inherit;border:2px solid var(--line);background:#fff;border-radius:12px;padding:8px 14px;cursor:pointer}
+.opt:hover{background:#eef1ff}.opt.ok{border-color:var(--ok);background:var(--okbg)}.opt.no{border-color:var(--bad);background:var(--badbg)}
+.bar{height:10px;background:#e7eaf7;border-radius:99px;overflow:hidden}.bar i{display:block;height:100%;background:var(--pri);transition:width .3s}
+.tabs{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0}
+.tab{font:inherit;font-size:.88rem;border:2px solid var(--line);background:#fff;border-radius:10px;padding:5px 12px;cursor:pointer;font-weight:700}
+.tab.on{background:var(--pink);border-color:var(--pink);color:#fff}
+.hero{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+.hero .card{margin:0}.go{cursor:pointer;transition:transform .15s}.go:hover{transform:translateY(-3px)}
+
+.langbar{display:flex;justify-content:flex-end;margin-bottom:6px}
+.bits{display:flex;gap:3px;direction:ltr;flex-wrap:wrap;align-items:center;margin:4px 0}
+.bits .lb{width:70px;font-size:.8rem;font-weight:800;color:var(--mut)}
+.bits .g{display:flex;gap:2px;margin-left:4px;margin-right:4px}
+.bt{width:26px;height:32px;display:grid;place-items:center;border:2px solid var(--line);border-radius:6px;background:#fff;font-family:ui-monospace,Consolas,monospace;font-weight:800;font-size:.95rem}
+.bt.o{background:var(--okbg);border-color:var(--ok)}
+.bt.cy{background:var(--warnbg);border-color:var(--warn)}
+.flr{display:flex;gap:4px;direction:ltr;flex-wrap:wrap}
+.fb{width:52px;text-align:center;border:2px solid var(--line);border-radius:10px;background:#fff;padding:2px 0;transition:all .25s}
+.fb small{display:block;font-size:.62rem;color:var(--mut);font-weight:700}
+.fb b{display:block;font-size:.8rem;font-family:ui-monospace,Consolas,monospace}
+.fb i{display:block;font-style:normal;font-size:1.2rem;font-weight:800;font-family:ui-monospace,Consolas,monospace}
+.fb.on{background:var(--pri);border-color:var(--pri);color:#fff}.fb.on small{color:#dfe5ff}
+.fb.un{opacity:.35;background:#f0f1f6}
+.fb.ctl{cursor:pointer}.fb.ctl.on{background:var(--pink);border-color:var(--pink)}
+.fe{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:8px;margin-top:10px}
+.fe>div{border:1px solid var(--line);border-radius:10px;background:#fff;padding:6px 12px}
+.fe>div.on{border-color:var(--pri);background:#eef1ff}
+.fe b.n{font-family:ui-monospace,Consolas,monospace}
+.ipm{display:flex;gap:4px;direction:ltr;flex-wrap:wrap;margin:6px 0}
+.ipm .mcell.ci{border-color:var(--ok);background:var(--okbg)}
+.ipm .mcell.ipc{box-shadow:0 0 0 3px var(--pri);border-color:var(--pri)}
+.ipm .ptr{font-size:.7rem;color:var(--pri);font-weight:800;height:1.1em}
+.jt{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:6px;direction:ltr;margin-top:8px}
+.jt div{border:2px solid var(--line);border-radius:10px;padding:2px 10px;background:#fff;font-family:ui-monospace,Consolas,monospace;font-size:.88rem}
+.jt div.y{border-color:var(--ok);background:var(--okbg)}.jt div.n{opacity:.55}
+@media(max-width:860px){.layout{flex-direction:column}aside{position:static;width:auto;height:auto;border-left:0;border-bottom:1px solid var(--line)}main{padding:18px 14px 50px}html{font-size:16px}}
+/* ===== Splash screen ===== */
+#splash{position:fixed;inset:0;z-index:2147483647;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 45%,#2b2b2e 0%,#161618 60%,#0b0b0c 100%);animation:splashOut .25s ease-in 750ms forwards;direction:ltr}
+#splash .sp-wrap{position:relative;width:min(52vmin,280px);aspect-ratio:1/1;animation:splashIn .3s cubic-bezier(.22,.9,.3,1) both}
+#splash .sp-wrap::before{content:"";position:absolute;inset:-14px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.14) 0%,rgba(255,255,255,0) 70%);filter:blur(6px)}
+#splash img{position:relative;display:block;width:100%;height:100%;border-radius:50%;object-fit:cover;border:3px solid rgba(255,255,255,.18);box-shadow:0 10px 40px rgba(0,0,0,.55),0 0 0 8px rgba(255,255,255,.04);user-select:none;-webkit-user-drag:none}
+@keyframes splashIn{from{opacity:0;transform:scale(.86)}to{opacity:1;transform:scale(1)}}
+@keyframes splashOut{to{opacity:0;visibility:hidden}}
+@media (prefers-reduced-motion:reduce){#splash .sp-wrap{animation:none}}
+html.sp-lock,html.sp-lock body{overflow:hidden}
+</style>
+</head>
+<body>
+<div id="splash" aria-hidden="true"><div class="sp-wrap"><img alt="" decoding="sync" draggable="false" src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAQDAwMDAgQDAwMEBAQFBgoGBgUFBgwICQcKDgwPDg4MDQ0PERYTDxAVEQ0NExoTFRcYGRkZDxIbHRsYHRYYGRj/2wBDAQQEBAYFBgsGBgsYEA0QGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBj/wgARCAHgAeADASIAAhEBAxEB/8QAHAAAAwEAAwEBAAAAAAAAAAAAAAECAwQFBgcI/8QAGgEBAQADAQEAAAAAAAAAAAAAAAECAwUEBv/aAAwDAQACEAMQAAAB+ftOAFQ0wAACANKmwhiBiBgU0KG0UwUMRTEDEDEAIGAAgblwxFKNAxdxAIGIoYhghiBoBCBiBgQCB06BywaKYiGIGIpiUUcbiHarouFXp48blHtjxIe408HR7xeL5R6o6TszkGXFrnkVDEwEUwIBFROqMwBiAAAABBIAxAxUFhDAppBRLGSFI4RzZ831p6jhdER2WHEK5Jxg5OEkIaoYABACOx7nyrruud1nGj1d9DVd6Jg0AIGJhnojMEMSKSIYigQDTh6IpicAimghoA4kcI4PD7DjVjnbjN6lZlqILKgoJVkQUEjVCZAAGuRRyeMHpO28f6+GSxoBiKYgeWpGI5piAaIQiq0TBohiKYgYlFYcDo67Lq6uMruyHYZzpJmtJIKdQ7CC1EjVSUGRpEAIAAADkccrnc/oiPY7+I7Y9CZaU3LhiKeWiMgIAVGkaAJgIGIGLMvz/H4w7myrrUye2YN0RO0xxHyVWJrmTNUZLTMRTM3ckNsidYIKCFciGDFRC1Rfpej3PQHD5ZSAYmTntkIAtigAoAgBE+Z166qc7D5MEbxHIqeXOkLj8tnEveawytRjWoZLXOs41DN7RGSsrN3BmVMJ3NZrRQRelYUA3ZGO0RXoeb5H05yWnDExoKxLiNBFMQMRD6rn+Zri1vkXWdRWqutLzs2143Ija+LhXI475sYvaTFbzWGe6OPeqjGdVWZrEYztBmVoZZ6omNZM9ZsePMDC0VnjzeOYaZzHr9PPegqhAxEPLSaBA2gaUnWZc/zZLQPXPUu5ZoZ7xopdFUzbTG40vG60VUYTuo488lVxo2ZjO+RlHJyM61g4+hrHEnaKNXsZ3lYlrmcPSuKLLkccn1Hl+xPRVDKQhoBCBiBoyOm6ylA1RdJ1bzuNNsg0uEaa5hqZVW146RvWLOQ8bq+LnyYuXgZbRoTGtnGWgcWXrU58vE4/K4nLji8jIrPTGSuNqjGEw14/bx3NcDn0AABCSKYiH1Pa+dOGCo0iyxRGmkBemVVppi41cTW9ZaRo8mbvMrfj5XG94yaZ471sZka5RBzuIqFtnkW8WFZFPNwGOmEaTKqYvODmcMPT8rHSqEQxFIQNBB5b1HlagaHcuBzdUlUU5qqqKKSDWs3GjhVvjFl1EmmcaF3kzQzzLebNbiS5lAZ0OFBaSDC4KzvMedwAB6Pm9b2QAAJksIBMXlfU9GRwu06sYmFw6dxUU4uqcsbiosgrSYcXUQaTGlW8nGlZyXMFabZkXGRWqkFWdQ8rwNpRUw5i4cU5qQGR3vY8Pl0wQ0ACBiIONySun6ruemgaYwB1DLqHVigtQynIWZ1A5DRQy7yZcoHpmzTNIqoKuUotJFY83hLakSSXQgHLI1jlVXeUEAnQCAQMABBh5v1nno4jl0xMYmOpByIox1G0i5SKcspy4ucrq6hlJQapBQc2XguSxi9rr2df5X1nk2TQtmlAABA1ddnzNrBohiKBAAQxAxA+JyivKvsOvEAMHAcjjrmHcS9Weg6WXiya54KwhHZ+lw2+Gj6b5CXo9Utmml3+uGzzVxpnrnX0HFw2en8NhnLRv2eeMfX/AJx0vn9PA4x2m/y9TPpunZdfrlrnrQAdpw/QRTQMRQAAmIQMTGIgE6XmvTGN8s/Refl5PsOi+sef2+T19J2fn9XV9tz8McuH1voexl8ZxPqdXH4r0/6F0yx/Lvv/AKd1Vx+Fcf8AQ5lj8g5n0ji45/HJ+38zLH5D6b6P1uvb8T6/71rs0/Fe++qdjht8j6bm46t3Q/GfuOe7y/LvV99rju6rXv8An69n5V6r6F896nFVej5NnD5AstbQUCBiIaRQJjJY0Iblj+4/Ev0f4/f5X89fePlWvf036Z/Lv64y15eE+hHm9X5T6j9PfnfocvrNJW7Rpy+vce6978L+t6PV9d28n67w9EVGNltUlREukufj+y8nt0+d8x5rje/mdjwE9mtaZMv6Z3P1fx+/oO+S8fR/PngPV8DqcX7J6bynveX2vzjPa9R1/n2Iyg0oYigQDRDEDEDaDkfoz82foPx9HyXV+m4fj6PwT9X/AJr+6+znevc14/e+DzncfjXhv08b/J+XvR/fyzyPrWtHpYPHIBI5aUYxAAhnn/kX3026fyufqd7tH59+nezNW9TU6fTOenAZflr6D89+z+zm7+x8z6Xw9X4j0uuPZ+cYi4tCpiBiIBAxOgTgaB/ZPjXr9Po+mdJ67zPK73ne67nqt3n988717Lcu4NpsQQMTG0WAENNU0wQEoBSYoQADSzNRM5856Pw2WPivS991FdjtyvDHzsF1uA0IYimhDQgcsYgYmMQU5cffL+Rfc+X3PMbamn1+naLruou4sTYNDRgDQUNORDKAFEwAUIqRDAQMomomceU9b5WZcbSfRMsPz/7f590eMCXq8TEDEAIGJA5ZSRFEumIihFV7XxFYZ/pbL4d9F53W9lyfM+l0+q7ikpg1sHYCBgwBWMTlBNAChNSgIQCgJZi88c8urOtynf8Az/o/DerwVAvdzWJDEikimgAACWMQMTGIG5cNyFks9f8Ac/zJ+jvD0+bUvydDRxdwbTYAmNoATBpgAiGKACBCAUlyyUPOZ/K/mvbdP1eC5Rs1MRQBACpoQxA0pKExiBicMTpiYADcuL+q/KOx17v0k+NyeX3aqLY0FNaGAmCbKBNEMlTEAIFUqAhRUTOfH+u+B7tHmkLp8UaKYgAQ0ACAEBnUGpnUUSVTllEsYgolxRLKqCvp/wBW/L/3zwdT09RXk9tuXcW02IwoTEQyEwBMUQCBBJLMh9Wy8x8U5vB6fDEjdpYiGIoEDEikkNEAkxXmGrihiBuWNyFkEWSVbhxXbdO5f0x2H59+8czt82s617bc0wYO4oGAIYAJqUQgSlmSZzOPgvc/PvfymkvX4WJFJA0AAoZJTEghAxAAh6ZM0csbkKJCiWNyxiBiI7X6R8/9j4ep9X5PyH6n5vbzqyuS3LYNwxuUlpCsSHJLJQ8pnXguL1GWPlfP+t8h0uMxG7QyQZIUSDQhiAhACBiBiBoB6ZONSSqJBtAxAxA3Lj0fvPF+953Y89t2PUavR9W7P4l9Jj07xvG25LjRLGIBKWTmepl5/wA34HHywfbrlY7PG+K934LpcZkno8tKQolRRIUki4kpiBiBiICSqJIoRReYaksokKJY3DKJD3fufK+u5Pf4vD7PHVv83xfRdPnp9D7/AOLc2z7LXjfU45ckioZELcef8PcfSeHjkZYHbLmY7jkRphs8r83+rfJulxaJPT4m5BiKYpKmVFOSqJCiSKSVMkG0ooRTQBUhqZWUAMSihFfWPR/G/qnL7XPjSfP7uPwuzyuPRcL0HXZa+qXJw2a+55nllZ6TpMaMtdOVjZ7K+Xhuje6wzlvjHG+Md/5/qcNgt/kYimTBUgMEMTBBDEUxB//EAC4QAAAGAQIGAQMFAQEBAAAAAAABAgMEEQUQEgYgITAxQBMUIkEVJDIzUBYlNP/aAAgBAQABBQLuV/gUK9qv8OvXr0dySHytj52R87I+RsxZeiZepXeUtYNUwwpM9QUxLCkrTy7lEEyHkhM98gjIIMIeacCtw+oSlRGR9uveNSUhc1lIVkTCpz5g5T5j6h4fUPD53gZmo+ew1MdbCHWJKXEuxFMzEuBStov2C7jslpoOTnFA1KUfpNS7S618SosoJdOPK7Rl67shtonZbjgJKlA0KLWvS3nsDq/kEJ7ejtGVdou14JRvOA48dsKfZSFPuqFGY2ivWjL2Se2fpuOIbJ2atQ6mdChQr1/A+d4JmPkETyCHW3PafmEgKNS1aVyUNpitaFeoRmk2ZxkErStPcLsmokpflG5zUKFa9TFCuSvUadW0pl9LyeYy5C7K1pQh+Qp5WhWYJIoUNxD7zBUKFChWlitD1rsnz9SNDjSwcZaAy98ieY+2pRJS++by9EpBEPA3gmzUEpSkGDSdkkxQoGdCjMUK1rlrsmXKZBp9bJkaHgR9PQlP/IvQi03AisJIiBa0KB9AarBJFCtOooVY8cp60D1IUK0oVoZBDim1supdRzH2Zj2xOhCx5BFqWhDoRKdHVRkmhQrSgY29mtPzqQqxQLxQMrHgGQacNpxCiWjmPnWskIpch5wkJMhYIFyWC6A3KBmagRWEp2lpQrTbWtCuXyKBgiB6l5Ck9C6Gf2n5JRaxHtq+Y+eTudddUmO1yFr5HQhZnpQSW0taFChQoUKFXrQMgRA9El0P+X5obfsLwDT0H9azCi1ju/Iz2zOk9GGVKNa9S18nrdBPTlI9aFCh/MUKH8joGKB6H9qCIKII6pR0NPQ1eCO0n0NRbkpOgYPyIa9r3clu7nNS1sEQ8aWC1vUtL1v5VV0oKO1VRUKBih5cV9y6Cy+1v+RkD/mL2rPqLCy62DCTLcpJtOpPcjtOL2NeT0LWwQsedPJi+QtL0sKUbhlREHXKCE7S1T9xrPakuhISKCy+0uiwrzYUCPofk+pfnRsifiRFWx2pq+nMXNfYugatwLpopygghelhSrMjpKj3KIupmDV1UY/Ng9D8fk9D1jL2SEJ2SO1KVukdgtCFjwQLSwWl0DVuMtDXRF50sKVRI6EahQ8Fel9NTB8h6/lJ7kdpw7e5S0/I/PIQvS6F9DPdqaq5L0vcZmEixeh+PwL1PX88kU7jdpX86+3v2PyZ2C0NXJehnYuiLlPxoeqvBaHyw/6O0vo68nYzy/nsXpepq1vUzHgF11vX86HqrwWh8sP+jtLbubN/u7t6XpYu9b1sWC0sXZ+T0LzofnRQLnjFUbtKR+7nf29y+S+e+SwZgtTPU+Q+ZtO4EVmRUjtzS+3tWL1vW/SS0a4xa/nlYL7IqNzvceRvZ9a+5Rmc1v6PBl2Up245lv42u6+jY7+ewZ0Op8t8pqBFrYLrqRWb8c4zOuHxxrVxEov1HU+nKktytpV3n2/kb/PPYItTUOoouSwdmElr+a+7Rppx5xiJHxUZ99ciRpj0w1PsyILEOQ8qTLBmCPp5VyRW/RktUfK0w68FlRpSZm1jpjwXhpqUriyEiuu3WHDXMW3w0+6D4fhw25ctt3WHipMsSVRYeiSNSmsQ78Ksh9OlTjjhhtl1404bIuBvhTJrLIY5zGvEGYtm1jHJbkuDIhqLkabNxZFRegZEpKy2r0YjuyHWMGloOsLkNs4SIgMwEpCceulwmDJWJiLBcORKVw7jzDvCrSw5wnOSF4zJQlxuJS/TJr2RyLrOKnumxw06oLj4nFFJyM2cbOFnvBvhtJGzCiw05PInMdawuRfCOHlEcfCREnGxdJaiNNlk5rcOP+iZSbIj4ViMpEPehvGWcqA27GyEE4MrRJGpTLfxt+k1jHp8mXjFNSxh1GWZcYJQUlqOhjI4FA/XsGgv+kwYLiHBGG8xiHAT0N4vjaBNpG2ieaU4CgOWWOUFQjQFRJKgnCoSE41ZBOOMJgtEH8VGcDUVqKn6R50JxrJBLCEDoQOQwgHMxCDVkcMP1LDEE5HEkbeQx7rhpIy4vQlvKjGY36wv0x2Kj08RETGwj8FBqltGxOxZ1mW4LaTNltTU3hCA+vJQ3sfkdCFmk2p0xk4vFWVjiDxjCfNtxDrelc1AyE/iTGQBI42kqD3EeYfDkyW6Ds9LBlYgcGrfi47FQ8W0OMFbuIxh8b9PinobbuMURkr0Wy3OkmmZTzjkrPML+ujHsmF/HTMYZjLxJsCTj5QvVKTUrDcIpU1GxisSvz2Z0eVkF5DhCGuC+w9Ff5C88O8Nmnk4jd+XiXFxjfyJSJCXGj3IyiCbzHotHTylft0pteUi/UY7wcF358ZrLhRZzGQ4LcIOcPZlo0YLLrOJwfk3lYvh+DjO9ksPCyrM3g2ewpeHybRoxGTWcThHJyDxnDcDGnqfQpjnzZLBxvihbekP/wCbKq35n0obn1GI2bVGVu5mL9JkuG3fk4a9+Yr48dEjqlztpNqQmybMmorizce9Lhd/5cU+iln/AG5nG/WY3g9zdgPf4ge+Hhrh/HVGV/a0mxmXvpuH/T4dmfS5eSiw8ijbpTGFb+kzHv8AEhG/EjJS1HSm3IzfXimXvk+mRmR4ianI4t9oMK2uNFtyvvzy35B5dNsNWHnEQoMh9ciV6mHySsdPtt9p6KresqV76i+WeUdxclpsklxHlCkPethc0cJTakOtutkpphe6P7q17ERm/wBvVDNZwmk+xj8vKx6mOJ4DqMZOjyle7kH22Yi8zjGG8lxE9KT+fa4dkfBm/d4tkW97rSzbdiSEyoXtmoiLJSjmZPvH6HCs3cz7fEM36TEe/ClLhzmXUSI/sGDGcn/X5TvH6XDGT2q9niPJ/SQvRv0ELUhzDZNORg+vOmtQIcuU7Ml94+Qj9DHz3cfNiS2ZkT1XHUNNZnKryUzvHzX6GFyb0Gey6h5n0zOi4jyq5Dvev14Cd2QhTVwXmnkPteiZkRZPJfUHlkbH/wDFxJXk30iBkHYLzD7chnvqUSU5PKKkGwgZ0qc/xcMV5JabDrVHDmvQnokxmW13Xnm2GshknJZtt2aE0M8XT/FwJXOMgtFhxugy85HdgZVqUV9qxMnsw0Spj0t1CLNCKBEM+X7f/F4eT1BpC0WTjdH4EHNLaDTzbzel8pmRFPzaUhS1uLQiwhFERAhnk/8Am+3fa4fR+w0MgtFk43R0GJL0ZcbOtKDbzbqdTURFKzMSOUvIyJZkQQiwhFAi0IZhG7D9i/Uvs4MiLD6qILRYW0DIGEOOtKbzWQbH/QTQvOz1B6VJkCgQQ3YSigSQRCtJ5EeM579e+eDkHoLsSaxNa1NIUkLbBoBpFaUNoJIQ2EpBJFavvtRmcjk3Jq+W+9//xAArEQABBAECBQQCAgMAAAAAAAABAAIDEQQQEiEiMDFAExQyQSBRBWEjM4D/2gAIAQMBAT8B/wCm68utIozIaCn+VDwKQaT2To3N7jVkL39gnwlg5tPTNWdPTr5J8l8B2QjcewTHvhb8VRcUYnAX1GtLjQTmFporEha4biiyMHmQkYPtF8blsjd9J2LH+kyAs+JXtA424r27W/Fe1s8xTYms+IRxS424puPG36XAJ4bIeYpojaOCFEKZoa8gL0nbd3SwG8xKzmW2wsE8CE+Nr+6ngMZ/rQOIUEkhNBBxPf8AF731yJ0zz3Ks6Y2NfF6DQ3gE8b5KQYNm1OFGuj/HniQpG2KWINshadHC07EYUMRqa0N7fnJA169mP2o8djdCaCxI9zi9dgnm3Ho4z9ki/tPjqQPCPWCl+JpRM2N2rKfsj6eJP6jaX11wgq+1mT73UOnHIYzYUeYx44oURYRR6gRe1vcrIzb5WdbBfY26HpjSd+95PXgk9N9q74o9MLKl2M8HDnsbCj0gETtFlTy+o6/BBINhQS+o3Q/mBplz2dg8PDHJaBtEKvxA0uzSyRUh8PCH+NOagf2q0rQBdldprVmf7D4eIKiCIRagaXdVoXLiU0aZ4qTw8Sdrm7fvQhEIjSkAg3QmuJWXMJHcOl//xAAoEQACAQIGAgEEAwAAAAAAAAABAgADEQQQEiEwMTJAIhQgQVETQoD/2gAIAQIBAT8B/wBbXydwgvKXjf0LwsB3A4PWbVFXuLU1eOWsXsMtd/GIltzC4EdVqHubLA4JtyM1tzFYN1K9QqbCamPUKOZpcTW4i13EaqH8hPqLCwE/mJ7n1FvEQ1C3cFfTssas5m5iEr4iMXPc3EpG63M1i9uLFna0wrWNpixuIrlepSqhxkQJVVAN4R+vtQL/AGi01HUsMq1e2ywm/cX4pCx1Xg3HDi+hFaxvMQdSBsgbQYlhDiWjMT396VmWfVH9R67NkO5iGsAs/MXrhrrqWCK910+hT8o7ajeUF1Px16Whr+gc8NS0i/G6BhYx8Oy9Qi3fOFJ6lHDflubFJvfnpLpW3PVTWtp1y0E1N6OJpW+Q5BvKNPQvokX2lWnoNuPDUrDUfTxJ+UItwgWlA3QeniT84GhH39QmYfw9PEH5mCAzYy2dsicsKbp6demQdWV4JfMmE5AXmHplBvxf/8QAQBAAAQICBQkGAwUHBQAAAAAAAQACAxEEEiEiMRATIDBAQVFhcSMyUFKBkRQzQjRicpKhBUOCorHB0RUkU3Bz/9oACAEBAAY/Av8ApLvBfMb7r5jfdfMb7rvt91j4ndhzV1jAu97K0OPqrzXDRxKsiOVsir7SFdeFdPuqsUVCpjwm8QFjW6K7D91iB6L5hXzXL5jl8wq3U2msOaqux4FTY64qrrpUzh4LaZngFcuhTcSdjzUe83irDNpwKzMW0HejBf3N3gVpt4KU6o5KxpKtEtlqbsjHHGUis27EbfapQhVHmKrR4pcV2MEdSu/7bS07fN5Uod0K3bPmOXen1XaN9Qrjp7VVh2nipuM/AZgyUotvNTaZ7NMmQVVljfBZtPorMeGyVnGxcG8MvDQstXl07NmmFKMz+ILOQHVlbY4YjYqxwX3dwy25bFNysGSxWnQt2mzDgs5DsdsVVvdGjZqLVYrdosVuSs1TGwZtuJ1lqu6i3Y7MkjkrD1QcMNcXFGWJVRtvE6izJYrVIaVmxzyTGCmMkslQmw64QGeqzUPvHE+CVhlsyS3aIO/frJovd3ii479RZls1nLLy1VU70W8FMaEjoVdx1tQYDWT1ch3ctRqkMk8tXQlkrZORyzy24Ie4KDuOrLlPZqowUhkqtxXPJLJW9snXQGlPRLPrZgqvDVtZ662Q1PLLIYqZ0Kg2Ic7E7g63VnlrJanloTOjPY2u1bjz2Oeq5bINWeqnsNuqkNl9dW7qobd+J2SzSkNm9dXV4lDptMhpWbCNXDcm9PDj0mpIDWNd4JEibmDVRXcGqtuGtI8DkFDg/XEdN2qPF5Ut+u5HZbNGeWxNzvzXW1eA0BSIjfwhMo7f3bbeupDU0cNfzGpsVuWxY6czlsVuUQ4TC5xRpdKk+KMGp0aIbXZa1KjBssGnenxxSYT6rZ3Sokd2LzPU5w+mw1xgdLs2TlvUpzVgmrsF3rYp9n+ZWsn0M1I6BZCcwEcSpZz8oWdpcWwcSs1RoQhwRgOOWtLNw/M5GDQ78TB0Y/2ySaJnks/S3ZiEOOKMKgMzTfOe8VOI9zjzyShw3O6BXYBHVT7NvUoQosVjnkTkzdkDo84cPGcsUYjmZmF9K7Vl04O3HRkpDYSCi3KIUJtZx3KvTHz+61ZiABBg75b1eaXnmuyo7W+im4yUngvV2ghTdRmhfLcOhXYx4jeRE12cSG/rYg8wHAj6mqrFhkR2WSaO8qzocSruaArKO4fisU48UN5NU3SfE9ys3AhvbD8rRivlVBxcpx40+TVNkMN5rMQQXAbgq3wzmji+xdvSAOTFdguiHi5d0MHALBEQmmNH+mGy1OpFM7MuMzWxU6pjP5rtmzHkXdqt4IwokObVVnNh7uWQUt+xuLBcaJucs3BBLS2tkggbzJXjNB9Jdmofmkraaw+i+2N9ivtX8pX2tv5Vdp0D3VyPCd0cFYAsFYFIwmn0VkNjegVpVxs1KQkp/Dw58ZKwAdFa5XrVKKYrx5ZyCq0Shw4fRqvukFbarrcl+PDb1cFeplHH8S+3Uf8AMrKbR/zKfxtH/MhDhUuC95wa0zyQ2N8k8kR751G8OKdGIJhk1Q7ZIYLb77zkZNUWA76XSVG/9Apm1GG9gLTuKMSixHUc8MQn0WNi3A+YcdDFdlSYrejlfiNjt4PCEOlsNHd5sWoRIbg5pwI1ZaYudieSHapUWjQ4fN1qtpj28mWK/SYrurlaZ6EOPS6QYdYTqBtoVWjQrd7zichb5WAZIcJwvG85RKLKwts6og4jYmjiU0DcE6o6QbghSSO/ieahP4OBQOWo+7Fb3InBGBSYZa4b9x0ZNBJ4L4j9qNN7uwp4dVWoD3uo578Bxn6t1XwrYjqPRvre3vP5BSoM4cduBcZ1uqdBjwyx7cQdGQtKbTv2gy3FkI/1OhSjwdVTLJhl4oRK/og7iqSwec7E080DyTjzT2jvC0ZKPF80Np/TQzVKgiI3nuRf+z44cPJE/wAqRoLz+G1SFAjey/3BZR28zMqu1udi/wDI/XVaTDvbojcQiaK5tIZ7FSdQY/o1XaDH/Khng2js4ux9lnKuejed+7poTUeJ5ohKzru9E/pkZ0VJP3zscGKN7AipJwHcda1UU8G1fAI8TgwlMheY2prW2CWQuODWzT4h+oz2N0Am2G79EchiNHaMvBGH5IhHgFKdvLavun0twvO7vRDJF8z7o2RrXGTItwqamgVTIDRKHEAit8Ao9DH72Lb0CkBJoaickOiNPcFZ3XZJhNcT2jbr8hhlMPp4BD+41Bg35H0iJg0TT4z+88z2UP8A3brHhB7CHNNoKrMTYnA+ARH7hYi44ZPgoLuzZ3iN52f4ekGcA/yoPYQ5pwITrE3224uO5TOLrcjqJQ3Tfg543bT2bqzN7HYLtg+E7pMKKyBErBpnt04rwwONWZX2prpbm2owqMM1D47ztjGk3Ylw7dBooOF87c2I02tMwoVIb9bZ7ZM4BRo/E2dNvfQnm1t5u2OY0yfFujwCHSGYtKZGhmbXCY2txaezZdZ4D/p8V1hth/42r4WGe1i/oPAg9hk4WgoOJ7VtjxtDqRFOGA4lPpEU3neBtjwj+JvEJtIgumD+mzOiRHVWttJVkxBb3G/38FDRehP7zUIkMzadkmUKLCMoO/73g0MLjDOLUIkJ02nYplfDwD2e88VD/D4MzJ5oZxahEhOm07BWcZAIwKOZQ958ymVCPLwb+E5a0M2b28VXhm3e3hrjEiuDWhVGXYXDjlgnr4M88GaAfCcWuVSJJkX+usvmb9zAq0Q2bm8NCEefg0d/QaQh0mb2ebeEHwnhzeWomTIIw6Jed50XvcXOO86LXcH+DPdxfp1oTyFVpIzZ8wwVaG9rxy0JkqTHZ1/Bqvuqs8o04vK3wZvU6mtCiOYeRXzA/wDEF3YPsu8xvQLtoz3cp6mMCZXfBpstacWqvCdbvbvGyGJGfVCqi7CGDdk//8QAKRAAAwABAwMEAQUBAQAAAAAAAAERIRAxQSBRYTBxgaGRQLHB0fDh8f/aAAgBAQABPyH1EzEkv1N6mjGy/UpUUevf0jRka/TLu/QPA94j5GvfQGQZbRwTNkft+h7H6RQUpS9V6EN/3OG1P70TcPdB/wDng+/MLpWwV8jL98fuPQmnnVkW5j7cmCovbYZk9x5T+RJRNd1pfRdbG3p3pSbYol0c63WlFFSeWbO7eBwL5Gz+zG5fGf8AqH/rDco2ryy43egmTqcZgvBjC5N/hFvG23YdL+FZHDzfYSNVO+i1RqF0vppSdtb1XTCfOA+iL7i6J5f6JOOoxDXHcjzNlco2WbJMNWbrLsLKvovJB+olX6e8rsbmPeDyP2Yj91BtpRCE9fnrVV4OSJjH8Qa1nZ9ujHSjdFHpJfSbVGiP96fg9pBu5hU/nMC2S7YFAu4ghOuEJ6O2jK27j9Km+4kfTtqlX6cKl2RRR5OR5TNvySJRaTQ1OqEITVomfQTbVONGe/cbj8YexEFtR4FL00eVB4fVuJRejwUv2siq7PuJdhIQhCD0DdIhBHAhC3omkJ0cHGk1qUy5RCVPZuKCqPt0UujVNjguqT0XBZHLHzv3OWJCEhIS6BBozxCbYxIOLcre2idEIQaGiE0uthENEfB8pXBl5hz61lV0Jz6LFAhAbOwSKkJ4ghIQhbuDW5TeBJFaSeTNK2/IxkTJoeNxs8J8i7yGCKyaIPSEg+g+hbaLKY0YLJ+2xgpyypuLknWhY9Zj0GdsQ7VQEVvY5dBjcxtxHdIhICUyypG6toYVhyU0QttEGQJDU0mjZDIQg9xiVRBiJytIdgzleYVp0+f4Y55KPldTyh4x6Wev5tESYsI7Qxs6Awnp5aIWtB7wxyHoNJbjrbHkhLIvgIkwMhCaGs6LDQkNZMGNWhwI9lO5i5mD01JkfbubL3yu3WvPo5U777LRCQhIyxIQnoWi0NEcC/JOe2LXyPQh3GHuJnn8DbRohB2k0XPTcSa5oZYPYrKGWdhNOStg5he2OHcbnW60j63N4SE1I39BvNr5WIeAlZGi2EK3AsZELMmMq5RDIjydxqkzjUdePzEuW7IQYeFZBog1FRYCha5YiEE3CRaInyF7026IgLryJ8hqHtevD6qZrrb3VfScCGxKi7IQVE8Cr9kJpiGRLOEOHFlivIUQlwtD7x8F0hycEGsaLrcxiYGjdGYYWFH7BwZIzwQoRNZK7MuQ8majdE2nUUjZjocehYHP2Rvu+wwGtrquyESFoluYSF2XBEhKsaLNwm57iZSiZQ4JqPElY2/Y9DsbPsYTEFKgg1FT5JgIQTAQ/YGa8hcNxC7I/MFw5G6Ik0ZU/wC3W6Xrhm7+3VCRauCm+xUmBZMELXWlMvYTENgohUYSo22JN33IULbT9zMSo0Ct/Uwx3NpJpsssfb2Rt0bwlNXkxX8hvAqkGKC4G0CpaVEmthjcv7hCUHC+n4vQ22Nu+owvLMBOjYXwFN0N340TNhRBOihVvBslKjLSLm/Rn3uG4qNVL8zCQlOGwpMpr5GCsjSo2i4FChC1G2e6HmgNg3o5vc9gyrd56bJecuhbCG4dxS1wWxa4LBkwUWBCEXJSkZPYe8WAqTBSXkEHvPRRQP8AzLEe0Ovwi3ihK2KL7mA4MYyQ3GPkWB8CYuRbDPCchgOx+RfS8Cw1QiidelmluLR2BQKMLQ2kJXgYDBCZtW4tBS6Nh3Nw3Y54QkSSKsAxc0dCjeSjZRtZTwJm3RibSNcCvF+n7zNULYbNmiyEbhvhbiwi6bDIWgtxsNbwIpBjcVbr3ExDKY/YiInLGHho2RwKPLV4ug9h6+z8enn74rwWa3RDcQsLS4F3LrRaN62DX8GwpDCFvdFopd+ZkBm6ylyN5KOHsUfb3Lo+gzcXo310r0sSDyO75PokU31Iuq0cCxlmTgiw4QtxaKJmUKkEqssGxztyUo3VRc6PsNl6Bu6Uyff0jPkAbXtpWqF00onouaNmLBCG4SFg8BCGwYKIS5ZYOEWDb7AQ3gyZlHsP0hsY9uj3bn0dkcHwFpm40Lo2KIWjejFzktFp8vSlEUdbF4EhGBR6KU4BYRRsG+RspvEXR6UeLhi03bgtTwppcF9Dcr2jnoLS4GKNlpCWCtii0XXnS6Uo8vS6XAsujZTZmpX5b2Ng2UbvQenwZHUf9fVk++6ILbqW5RvSzTcSKNtvTBdEPKC1vTu9GJEit8CP6KyGxo9uulS2BA5sv1r87iFuRx6CRkolNG+C9zwyZFuYKJsyJKvd6UaJVlZcdkUoyCNt8CwaYX74RdPdJa+y8L9kbY1aOl6zduGxcbfXopLkQ1MtOOlj4iuRCzRKuwUu/RK8nZOEe4XRVokr7It9lca8XAEPJQe0+yLGHX28F0kjv/YMt0JknHg3Q6+kERZsTdOnf9j9Cxd3PfqauibuC+RDUwcrYgGN2SJzSXcsL/QcbO6Au2CRZS0b7ieBWSb9hwmvwL8w01qA7o/As+bJpKbvMePAl93BPArEJxmyQSZJKt7nwPSLcbnlLWrl7peZ9wfz3RC2JY33SMseTIqufK3wRiYUSZ8CRTgw39CWm3LFLVEv0K2qmPccPVhPZIQFozbHyxI55Jkq0/OgsS8whgmpOZ7Q+9bQx+f2fuARw2CmfSe5h/Tam39irn5/P+B7ZXlYhMSjuC5I3YrMF1snmftwcIDq/Jk1vymCg348+zHZLhWWB/CLnuYs18X7PhXFEjyBv0OUvAkEmK33HvSolV89kVkqQ9/AWfIFwvgwCOGBaGoSv89bNDZvFtzNUpVYhfJlv1b0oeSSkW3/AEW2io343JBgkf7AefgIY8Y5TNIg1vLDw3wk27qDyJfuy/gZT5cmIP5RTdeVk4KjTCsVP3ENkB9kmxfAixv3YnbobsOIu5Wz6V00stwoUtp7r+0IWPfN+Su+IM+t+RfhHDLS9z64kZQbfaOKGTeKJzb2mB+NEyYaNlyo+RCZmiJgscaX6fHVxqsRHN5/4OJUaaXiiMI3BDbeGj7II+QjB0aqmOQPivp4Eb5NnHAhKJQVt7jwjL2YpOP3B+kseV+R/MYy/wDARr+t1MSONCWkxsTSJsISsQ4iX/oewyaJxljxzHwJfoaWx3R2VnuYnBPNxmxVkkLbceaY7n7v5i0kn+5iTbiVZsdPyMRVaP7PyIbjI11X0+So8CE7WSvoWTGpDFdpZDgZJn74Zdwk9W1CW2st2fg2/wAHB7p6UtjL0RnRhIq2ZqyYY93l4KWJwzyd/AmkUOSDJkhyY0YFx/oEXkalZBiniHluiRTcaZC2qGxxJGF9fCf42GhrGmT6vpKDfVKb8DqPj4C1WyJmwQnfz03rvVRuFf2YTyj+hncQpaq/nQk82GhKboQ1PTbl7HwNfYxv4DjF8whkAeZEJ8lf1CI/yka9lxqslyXTguSlORYHubUntPmOxmln8H5qw/2JJr3dDS5o2/gF9G7H9HBIPR09uMlxd/chDlRlX7DLaM3ULT/oqvEF5Z/xDm+WSuPIxO5Ypjrd+D6kjjcw9KURyc6w4Ic40hyYOCnOrGZwn7cKL3H7Lkm+KpLQcLTX4I30Wv8AL/Rpqmy8jY+5jY37QVcozFn8xnq2IPcmDdUXXMm2k126XqmxsvyhtCkoJfCixIWxYj5n+kwojwXj7NkQwTeGQTLCHZ2NC6W89HAtJj0OdOcj140Yxj89h+KKyPkJLwe5pgNiKcvmG3110pfTQGRrKaEtWiHZ9/kcqodweUQlbp/kLYWq05J+gyXVjGPYUrvT7/8ADllv9jFwNknznZDF6y/6VgG38V7/AASdGHkkOjTtIVuoWUnw8i046Ezz69yI51YzkYmyyT2QfsKxMJvv+Hget6b6tF1x7D5f+hJM6xUxcLKUQ/cpVqtfbX39Z9LGI4copKvNZi2FAW/w1eRt789F9Gl7afPXSGu9039Hlml+4R2lUJuLYQtWU59edLGSRrTBPsLGUx0R+HWL+Bu09LpdN/Vum5xpS6PmCX/AbaITxrjTZ+tz0NjemycrT5eEUvqUul6L00pREcSjPKNlhHsfOiELo4nRfR9zjVjGOb4itjSvE/FMIbL6d0aL10bth8fKELRa7GKNEJ6F0fQ2NjeD6w3Lll9duvo59HgT0d3yl3XKFlk7hHAteM+o9PGrHoZJVuJcszJ/jOX61G404L6tExT+Uj78haLXJb6nGCF0ejOIdHPzjfrN4OdFBdaXrutGqXYOGI4L533+S9HIvVejYxswXk8nEijZt9l29G6UpdGLpTudNL10pTFkWODtE9T25bsxMTOdMGJrz17j1bGxSRKjhDm3wf8AI89VLrz0tFNKUpRUum6UulLpdKMVbE/nXknttTEJ40uTfpvR7ngZcFKKa5JLdsaDTmOX9aXW9d1cLrsZdL6dKe9r/Yi3XP8AshUzaMTEIum/U9jgujKUBEt32KPjv/cGwN/5FL00ut1eEPPoJxm/RS63q9jJv6M9RyFjf+15ERlPx7ieClHojzqyjZaUbGRBCtvZDQF5y/8ABnD3G/uXSl9GjdfpJwvq/Es0LqQyAPvbDZbbm4TLreqjY2ckEGNd1vHLzY6zIVg/E3XSl0pRu+onGW9d6f8ANGdFCj2EVRyhIb2T29mhMvU2NjD66XkM2n2xsHFCYj5XX0UpS50pem+tYxNM4KUpS6cFKXCw7RwA+yK8luduYSf4Y5IuWKXRSlGx7SRu2YV7DfZe3cyIgbNxz+DgDEJgtBtFG+i9DeC+jeuirf0pf5yQ0NHOL2Blkj2F/nlcP3RP+Wjf0eQovRO6NjkkkuXgYPxA+WTXYMa/7oNbYQii0EtHxT99L1uC6XS50pS9F0ul0yKNyr0Himq3MaGhrRTwOREBTzMCQs2nvin/ADf7EcQdlhe7D8CCDRNg8RBalKkb5fXR1sPXb9EsC61Lc72ZslNwNhjRzGIq20OW54BmCrQ3sPuSekhNEhE/Zl297nl9T9Z//9oADAMBAAIAAwAAABCoShDJx6p7RaRbwxyiwDypCAo4yQQBQgRL5KqAYpQ5xz4L5YowZqwLzjATDDzBjg7hwgxTyLQAbwCJZw5zCDygQhR6ASIArx5rLgZA7Ax76Ro6Dg4pohTYwirwCogAZRq4I4DgzIyjYa4qjq4ipADqQDjTzSwDjwj7RghwCygAglBwTjRBiQCLjZayypDYLD4oDAKyQbRYxTIyjpoD4ww4iBrTiLi7bhCrAbI4qrpIgQrwD7DSBgDywQpSDqhC7BQTSAqBDxCwC2xTAwhhIbyoIIZyoZDp647rQg6CzjypCAJypYTQYIQZQJZRYDzLa57gjyYBqIwagx7wGJAKiBSLBgDCFTzESlzzhzSGhBjKrqBKDLiDJgbBg67QaDx45C6zwIyRzALCr5YpSRBSro7YL4bzoKoqgBoTLjQTDxYxhADggTzwoQhxARQKCDT4BD6CzoJ5ghRIpI5iLbUrLt1Ky/4QjBKaiAjDgLh8NDn3fczspnjzDq7tzap0Zjw5zhxSymAcNtL/AJYyc/2DnIWUqraHAmw4iGGCRhoZQBGlWHdxQ545IB4LYkKcACCI6i+1OeB18EN/VB+8m9lzmx+iWsU0s44ca3sUoZ5ScrxAQG21IE3Rck8ooA4WM+Q570gzQkyFKLBU8gkGVvCG2YQQIE4gieeN88B1GoqDwCkoYAh+wykUAc4c6QAwyYZ5x2WwJym00pzsmgEkQoIgGwgY0aaE0zYjgRzjSZBMU78+g4EcwYAoM4wGQCav0cZ5FBQNMs1AwwQmM8wgEookc4oU2C4tjOnaOr5OHAIoIwk48cgQiAMg486ls4al4As5ASq4YmiWIMACEeg8wsIIUywazCrKyzgAtKqwUmgIOUMmAQgAwGE7MRTY/kX89a02oE8AIeMI/8QAJREBAAICAgICAgIDAAAAAAAAAQARECExQTBAIFFQYYGhYHCR/9oACAEDAQE/EP8AVR7F/wCL3+UvyX8ePJf5FQC+2NF6wJlQfEa9C4WkfoXOgMgXcS1Pf1gLhkC2iGl1P7hEOhOZIyv+UEmXaa8gA9sqzFYWkuVLnFAnIIwZoRsX7WRsCsA6l/bE3XQbsxrcRCjpqGOM6lQZNMbJxARIV14jU9SiLiUwcbmgxc4BlmLP3CKFMGpdwZcvqRuC3LBgGr+IZTUZR2zXOipf+EVyHf7iyyQBTGLNQ7a3BqFRIQyFTZpufvRG6tgSwWMrDYssH78NYvDqJYQfY9MEY6+Dg+IGAUoEjLz7fENTYnZEraO4kZxlhDJg3hRQZoqm6tHjCvubhpjtFnlDB2wJXf8Ap5r19YGLlfC8VAgnBfoA1nWAFMXF5MGCCW4cvo7p2cQRInyqVeA04I79OvRNchDu7iQViskC8AVGbhPT2RzcrfvAwkqVAXAFR1nEoB6f9+UNkv1DFYBg0LinRxACCvWsUkCYKgmjcpbcITafZ6ZjiMWYrZSdyz3HlUCoZs1C7xPF/8QAIBEAAwACAwEBAQEBAAAAAAAAAAEREDEgITBBQFFhUP/aAAgBAgEBPxB8LyuN+dE8zixFN5vCDFmGzZMPznlMomF495WLh4hS43ml5IRc3N4seHhDN5mYaH4v/gQheEw83wp3m4eF6sRC8ILEEPL/ABTkvwPCxSFy8QbFlD8nlC4zD46HliwxYvG5v6KIfN4ubnWWLjeL85iZWFhNaH+N82qc+4uBTRvuby2aLwokfSNyN2z0jCX6dFG7YZZsejsxjNtZsmJaRbRCMPvLFzghfgIKFx0QlpqbBMWgmP6GfWFiXYJ+pFffoUZAfR+haQPokBG9gxqMdK9jV7D7/ZPFqVCyz2dgO6xMPYxraL7oLT7VcIVqhN0ErSNFwtesOkv+IY7fo8Hi8WIV0HIT4IQYY1R1T7GlEoMa1Fxp0KfWJ0bcWEqImonQkVcITOi6v4NHBjX+C8d41ljKKMe5KX8ELw2jqGmWsguKzC8UnZeojs2343DEbS9kOaIJiysIXJi/oQaJIpvxhCSYrKwszhvoSgTxRc0oBp9Hic7lnf8AxC9d5o+AsLwojeIRD76vgta0Oi1zeXWJ+hmY37dFf5kUpSlHiCv8YLiIajP4F470JLs8PZc7xeG/KhNMDTOhssp/pEl1ibOo/nouNw/7J4UDCUiKlrOWjGiP9C53P//EACgQAQACAgICAgICAwEBAQAAAAEAESExQVEQYXGBkaGxwSDR4fAw8f/aAAgBAQABPxD1f+F58l3FGfWWbheoZbj3KTH3FqXcNwlxsly8S5njxcuW3ccvi7nMxctNRW5dG3xcMpcuepcueofU12SWw8r7mbg4fFxZe/UZojBxU0eLlw8afF5jqiH7MvuChLnMFuaPGo5hqWXA8W1dyl+pf4ly8S2Z3LzOJcrPi8y5eYS6JbfgZzLVMMW0kX3cuXMb8Djxcys0+L/yvMwMWXiX5/CAAAS7d3Ll4/x4qX45uLRTLhmIFqB7l190ZoT8iIbL6RDQ30n6yBDR+aDFlys34umcTvzfqXfm8wqYSksiGciXLnEvxeJcvuEvEuXLucQcXLtlksha0EI25fAg8F48XLi+vCyXxFo1AsuaTMffYG6PLIeDiye7r/ZFwgbujneZjwKaa+I4YzpEFUvTY/coBD8D+oQTcvT8bnzz1r8ILa3xZf6iEj6+xEE1owljLgF7ly5c+fC9S5cPLBjapMwfF9eOfC8x+IsGNpeJcsuLUwKCkH3Bxmc+LwmzxgZg9RbjgkpPe4qpdnUsX5l7S4f9MYoj/wBbiDSv0PC//wBfPT3rP5loh7AEvMvM9y6mOfF1ATg0jSRQrHJk+GPwAzjT5S3qds/BIOI+lf2cQibbTn5PqAzBLE0kuXnEuDmXmXLZdEAxHT+Z8JfU2lxZZLiz14cuIYl9xX0QoAKJfDL6PDaMtr1LRlh7g8aIU3BepZBH2v8AkRcMJmHy1zdM8eNymceCVKZX+VTFRARE0k0J91n/AGxxoDdY/wBhPtIZV8PqZ05PxdfUdIREsTUGzxjUWpet3Nv8eNEAKYlzqXLwy8Y3Ll4i/P8AgN3LI+TBCgwS7nMvFS3vwvz44zFCItbjOv8AUQb3zZ+TFLuORMsqqcIIlksfjwJ8Rcv6l0lSs+Pcb4iYlSvCGb3OMz+PF8wtvRXJ66mQItmbjXpcuVWH8Swqdp2/8QWpdZXEu8y7bjr3Ct4luos0iFCYi+jucTflLKnMYPuLjHMS96hgol4lzi+JctqoZZWWXnMcEDKsMTthwL8P7gqpNuBXxuGXY0NvxDrX9T9RsMq7Wci/EByEbOIgiV4wypX7ldyjPnPnHcqOpTNE3EnMyr58AdB8sOIkXMuBZ4u25zNZl49sPaJShF7jhggrLs+Y/mOqlQOZZeqmD45hQUEvEuWeOfNkxxCpTaZX4Ixwn2/6hQ8ZVXcA2xzpDt5gBUoGJSyhuLnBGVKzibxBzGNNRsyqlC3LNRpSVzMXibjvzQ7YRcixOGPJcv4B0TGh/u2fiWE3IaT68Lwbbl9walzhxARG45mHWZe8bimP4mK3LYCqIFB9y7gpBqWy+fAy4oJXByxBIOHZP7i7nEtQawi7qvmCNwq1cBUtFcXmXYx8su2ybRtEfROYhLQyhFcIlxKlZjCZity3UR1EjM4S3CO42gIw9w5oUlJE/RNh89wOxXa8EuvJZ3KvA9xtU7i1FuJbU5la3bLzLWaly5daghLhbhtTBF303T/STPfMEAd1LIvEFghV1PclQbjFoGO4qQUOpSKCnBDdX4npKto+I4Yo7ZS85e5hRcqVeZUaGo2gDUSA4lNx6xN+ppDMrMOYuLFmGKcQRoL8QNicmj2SytRn2fHZBxLly/Fzsj/C5to14vuZm2Xm5ebl+AHFtX+o3Coxc+2VTmP1Hbr2dzEjPbDupSsh2sqn0hPy3k/iNTwQXqOh1E6CjkJgUAEBkqjEQDOb7jwILGCKS/EO0oaglQSx5EJk4iVKtqADGIMUspOPBZmmAbEqyUbdBNwU1gBR8huH5zBVT+430o5Se/iCuiXfgaPFzKBhl+AADR4uOpjUvPi73BXltWWK3F/sfcoFssUMwLAt6licSzsiIxQdu4UX7NspRDyuVlLJZMzTtcy5ZXRqOMXgmDZ6QsGjqGIKPBPzCAjuAGAiLQLFGYke8+ESxCWW2NC4WcxoZKgG0DUAu4iWTHiA6L6hS5xMyyXlxm4zlcPx1D24bTPwckJvEdDDqbhib8Ep7gsriDOd3MT2eKzKx4UC1o7YiZzs59/EK3AriHY7lEVqK1/ct2T2wTVvuO7qX4lW6ub0LIsY6qHuUyQeeWLgWwWrjzhKoCVaNO0bpXHyqu0Kz8oVcTKb6jFhoPudqJbKsqjAruWty7CanDGXfcRUlTemYAlHPcrVgYlrfxMBL5I3MN8B0wC3BzqHgqos9TFywpxuXHxbVebxM3hjUwDE5/6TWIGoKuNFVsHOg0mJichFiPVEwBYsHA2svv7qY1VczPs82ejEURVZib5PuM3L6ER/HCNAMeol4Z+CF88RAwpYjaI1CtpEoiX4lApKVyMBdRbdkEpzwxblrGMA2DZzAZYqGiaGnqDuN4ZQ0j2rpbgSgkbJbOIYiy45KliRxmXLaWoU5l3LOJS4tfPqKxa1dH29S0J/ooepQWkc6/KbVgDRUPUeDFUajt74JsSvKyqP8UtJejgjnlJRgtb7SxiVUZVH0ji4ol+m+F6IQp7Vi7rmJvwAUL9RxAxOCJ+pzioSwHcw0FFRfl2ygHFwsVNrNynoeJrZhG0Mh1MiFggrSrHx7idWj1BatNMx/TmMqj3a3bX/AEgle/Ny/AZeSXvNy60y28susPEsq+pfEyIV6h1c4ld89Qi2y3BqMgi4YmlgCF4gF1/MdY9j4kYW6OiI0uZQNbsOIErbbMyBTOoWiiWfcpMR9QAAoOpatR+kVca22B3Cyxhq+Yt2QRPEcBMX3GqwhFDR+5RLLMunNQX1oxMadxKHiVAbMkQgFN5gl/G4VBpuoJgsTMVLtGLAbHM0u+ZyIBSkyJxLp3+eOZecy8XOJezUV/5F48DrEd+46iyiC0MHbxBdy1zk0PRGrWhl5guggV/JAKI8TZ13GzImtVBzNFVeY2LUxEvO1KcBAQvmGU3EEu+VzN1GnEbbgCWg3Bq/K7/6mTUVthScvfaXLj6jYNrRAEajK0S9/wDLhDOlfcpu7mcOYToyYYgnFWeJ38lfEWyrX79QI2+OmAyYNPmM8KZIpo4PUeZeFxuLqjVemoQsm1Eu7Y2ZfTL/AMLuIQvNZIxdjrmKL8CyjcDAS4bgYG41VV0mLoYl8mf6cTY9QYUzdQssxA7IrxUsxg9QPqWFXcWwQDl4j1V+P9ZRCAwBEpdZj3O9fEx8ATOA9caH9wUAZwCJfhEZY9kQDpHuFaVKLGaYqWwlkrTAlsvbj2gLCZcNnwxXr6j7bMJBNK/5mOW03BjECtSejs+IXLAgtbhmtUIzLxLiruZeJcwkvEuG4XPYvniOCqWry+QUsNVKauUNG5TyO4UXwRrGCD1GuukBWCoBob7eormxxIKJnETgI6t3Bm2ckpQEEDa8S76G3uAgoCAQ9TNK4FOH+4WwyL/UBFGAcpl0Ss+gCJ8fPXLCQq3Ae5lzuZXymINvxMmu4YsXClnLC+0cb4xCv6xHf+glGMDuMQ2JGVxjUauGoORdq4goaexl2+eZe/F4lz1LqEYwqPjXjiXmHA1EVKWsw8swzxF1tEdGiNYsx1L8py9RYH37i5iwd+BeigEBoYZwIrQysu+/yyr7u3uX7j4x1eouyc2wV3LCJLira7YbbL9RBwFAoIjtenpZTirue4HVMe4gWAXqiYWbHEraI345gPuW2RV8FKaizd7iujdzCM5a/cQSChE9Gnw9eLnEG2XiX4WIO7AMZfcEWM+CXwKKjV7ZQL5ms2w4HMWvLy9RID8wZLcxBlZfRriYcgwbyRUUAZZVsg0dyuAlEKgW9BFZLXKwRggQ3HruXTuMPUN1m9WZ3ywy4Ay9sUPSX3mIr1mS7mKeMkxMgMV/BHCLY9o9Z4xMlLzO0YKlWMAe6t/JmX4EIp1LrPjnxeczVxuw/kgzbLHOIKpLmDaXHmdEYFQwdRQNyEq28sekuY3Y2eookZz6hl2uFyx5Do7gohTDDoo8IbNazACP6lWCDXqajb+WIK7lHOxe5mFy4Nh1Bor4jR4lQNXiMWbWO47uDTL3Hl7gpiq+Gt7b+L5u9y8S+pbDqOo7i1b9zMv/AIYXKtBb344lqZzKBU1G2EAhmAIwLZWaS4ZZaqi90ShzmFIlCVAKPEoYS1Zh6K99Rrc3cHEWcx4cQtEsGuCUAYgbr4JokBj1lgNHMyZXW9tR6T5Sm/pGLmB8xXc0zqbdRtrUd2+NxL0n/Uz35HMos3rMqLx40pYyPH8ksIr5adfqY9y7jV4mGYBruD8BBsog4uKA4hFil1KGsxbWY4RalKg9pYfshX2mBELRVwJ8SxiKTPL1Gq5/mNEAMGINWoR0Uu2Y3Ja4VlpuMFxcujkmseF9x0sWLhLwJHfljuM7zDuW36n3LOWZ4xOJjhnMV56h4eD+Q5iK+AAPvxl4KZhmMC/F2wZeIoDFMcoVf1KHNQvgoIhRiYohtfqajB1Ls8RAjdr8osRRyofMRzPLFUACghXMejLolcGGBiQL3A20RwWHV5aTmWvhYCPLKXEyiwqMq5VEzuht+bLMvi8XBNRxbBU9w3v2TFuc9xcHMzYdQMUoQrkFJj3WfhjNJlJx4sWJgdsTUVk48A9wbQywTZS2BCF2x4GXuZWxYMK4i3cYc56gQy0SlWncQFHMvbYtBEnMT1dQ1llbwQyl1Qqxczep9KruGHszgn4RWAmGVm3hYJiUd/1RCHsQ+5xuX4S+OOp0E09xcVcv8y6lq3c+WLeGaIpRosbPUo4yi+/BqGvFw1DVSlAQamHpM1VLMEAyQV3iXJkwXbggHuNpnBuFffgt7Y8DBCiCuVuriYLctqXm41tceUalkKlS9d8Q2AI0nUyTLRLC4uPnxsiLron4jidJb2wiOC8n0l3ObuXONeL7mIM+IM3GVcEn2EaTi6l1mXcvqXxBlAQEpMNx3KZMFq0+CWqWGZUMUzlFQYIPc2gr6lA3DTa/Uy3qX4QBbCWeLoqL8E0VFmIAWANqx+tCflyV8FkuLW4trmKoJdSpog2q8vhGBIA2l0EJ7sfcDEuXiXmXNvg8XUumDbLxXErp5v8AkmH2ItL4g2DLxLh6gXqXRNMCzvqCfQP1CFWr2+MnJ6lDYJV1fhMt48BoFYmA3UFTsxXe93qWEFEaUG4n0uT+fAgM0KAWrGVFoOeF93qYkawyxLqvuPf+piXCU0ZU/FQwBx4bWpUglsDARnqDRUGnCgPWZT3W5WZcvEuX6i3xFphL7gy8+Lbl1DvD8z1EwERpGJioNCXz4IRVax2/ySx+uFNGogWtTgGO2MLoHuGCiu2aME3Li/GXRK64G6NS2fAOoXZVy0VGgLWKdEXfuOsRW/REQJQN17eiY6fLIug5b54lyTV6cD0GJpuO5SNSm0+w49R+miqgYBvojirbHFuD6KJV7gZoCTK2EArucy43CXIcGz9sGibcwxOamSWy68Ws5nfgYXdy2OYN6sxDX/UcHis+KhWWXqPtWCHXODsPrsgddaFL+oQm+On7jZqBbZp+YqtBwz9Me1rNlZjVh9sStwBbH5lnECsOxzGpN2pPyyt9TA+MQxeAGMcu34jf5l5DO47yMKnsNsYwQRRduE+SUKqqtqx0mUoq/E3DFeXR2fcyEYEe+XXxFCgtT/KF3Lifw1PuBCrizg47d9/olu5BehkcwCCWSR5NX01b7jjG3RHKnfa8wCszQfycPqGz68ceCSo56iD4HQHi5eIufNy6ZZLgy8eblwIw6Rm31iGZWZYqWwF1tzMVE/hHJ9TUe9eHR6+dwBCdsn4IMI6Y/mM7CHMS8nZxh9ZfMP4YvK+if5jDSprOdoQPsphDugLL8iSmlrxE5tSuZhCWrGJ9oaIW+6+MvuPRWLgH5j8eWo/M4j9T8s/SIYtOCCPQfoxKNlzT/XcrVWWgftmOs/lXftzA+UHrjlW3+I+ZUJBH7Q/3zZ/FsYwXKHzTEEZ1Yf8ACCHYxmPKo/vaa6N5lhJrIXwDQdSmG6up60jgyGSx9kDVqDX11H8dHUxseH3AfaI8Dp9k58OSTqUhH5Ezfi5c+PN3iXivN48Lrxc1cUM74tGqO1UyIgpSu7GzMsEj+ShulnxTOFppdKDX3L9Vcqf6jIcHDv6jyJP/AFxDKN5lDFs6Lv7IRVhgvP3KGL3ggQU/qPFKuSExOKmKY1WgP6mJEJoBDQg3wTFhRMLI3Sa0FnyxYCuhB+JgJHolB+Smy6RsdJVT5ZRcdAF7dn8zNtu2YyUTmDtUOiK8adqh6hG/7BjW7Cgdvuo9a+qsrS3oES27NsmwpQ/hBEh0TqYlUnpf/MFsF8exSr/RFbh0VhdPTErEWX1LqfMuCO4yy5fVS6BLFMXDMvxZctynzBpuZTywyuo/FIgCvVaBkj+a/ehw/ipQiRvzT+5QY7ihPzoukZnAe536Wfox8LgaGfgP6mSy5clAKfMz1eFhnBRAMPq5xBgTT0aY3P6C0+3cUEUBB2JNuPiU7bMRwtog33AF1ENsJRlA1c2kfMTUAin8dEQ/hTkUFv4yiPXGQX4REv2s/wByyueWf5nQmItcwbpoDMWBsXEZBaNV8XCpBV+b+B6KIjcltrNppR/tAqkaA2soJqqnvT6KJwWeNZJ8oSIi7YjTLSXRfi+NS5TuDZcU6mIXdhBsLg3bbc5vcdXUvX8S8Y33BX0g6J+XSCsAP4ARyuSYMYWACazUEKt9pHyRf9UWMMbBPsGGI+o/aiNv2h8kf6mIXgaSTW4PtIy3tblUXE2OKkOgDbLgt1JhzYZ/g5hnKFoLzMg50fmIVslllSjk3DLMoZYoCOICsRMg3E7RrZ/EM2IYzvP075aIfMFoHY6vhI3Q9SROTs9ks5IWIwq8yxAdxAWr0HMYxQOytg99flAFIGkGm4GHkX4v6QBJoGEWB+WoqaostV6rqajA/eYDgFgNW/7S3qXeYOaii16jZonLUu9S8VNQc3C6jwzcvPMu9S85mLhXJC1Z78IHSJ9whC1P5hOdB5eA+S4ryRrkSPENwnaLg8zeKCGIHyEQzd7l8S9clGq9Bh+yDSuSr4RhEdep+VjqD0H65vlj69OTP0L65jmDRjcsM1ULYEBXMcYNxbGczK0aF8yg3MGW4jA1NlygcHUf65HpxM1NpQLpWH6Y2MRqxfzaB2S1hPyxyayLX65PlhJmYI/wfluGAdwJsqOo4QAV9Zjp2V925U3QEyD+2WZSwJ2sJELESH4x/UW2afcVM6xOdS2Pfi/fi7g48Xm/FkMsMtwOypMxdKsaeQt+yGCUjfuX9t+kqNrUMU7PpjWgB6vP4qEHuGHc7jmBdEydHzAgga1FO5pVYlEajnnHh6jY2Mb7glOohrHhzP0RVblq1+Ig1rMBYbmKBctq44hDcvh1NosVLQovOqcH1CmHLa/ETPHbQGIIUcRHLQXixiEW2PaP9y7ZdajuKsuX/gMv3cGLLqXLg4ha3LDSAnJlP3cvTjlMN3SJF7JIhkj9hAas8OgA/uGCFMEHES31KzmU6VL17iCC1jcT2JgVU3m5YxuUXcQdngpbXqaFEou4AZi7lZs0EsHqVmiadQOeImIq1Fii5ZiWH84fwWI2mBtFyny/xEMOcn5j++JRmSd5VzX1cSmvC9yyLLl+tyyNazLl3BxB8WcziXLywgb+RcE2/wDzmVamsylikbJgA7B7IC4Xyiwb4s/MWqcQ3mcEFqGWUYS2mX14FMe58o5azKYSgr14NWTm4AFEV4IXXFzPwmHDMmSYH3EqIbNS79o3fkVR3xbjlk/cV1tcwAoj1jTgMuNwZYdFYB1pPs/lFz4u4svuX4MYEvMuDLxLzmXLh+5sl1FevMAiaSEaNzxMfRn8wVsi6xNZAtvZMVGf7Br8hChsmmYJTMcalHEMO6g7sE6lVrcCmuJm4Lzz1MXOYgmYb8t1iZuc+Mg31KplqFNSm5bURN5lHcMU0B0vL+AS67dpwIiS67gYmUcqsHtaIw+wDdW4Pooi4iy5cvPhcf4Decw3LnMuXmDUuXW4PUq/Pwm+B72iKp1bAm5TZXlqMezynGZQ3RT7jhu4DlBpvnxxRKMOoJfaXYoN1CkxF70wAKP/AIYuU3d+FFKIBadwV0zFthvwptuWNLUgnNufGP6lr4GjBwhjRDVtLWdA9fyilwZ7TFS4vcGzE0oftlve5gcNvqDbUv14c4vxzMhLWepcBOzXbRyfyJRNxQHYwWpiIckzJfaDEKSGiVWGMTbDGxcw3lTqUGMwUFiuDUwk0Y/+JcVOFgH5jFtl4iOsQph4l/xNRz/iTOmP2QKAAh5xVLBy/PZ4ilSqyrti23N78UrcvUV3qLg5l5i58F3cujEUcs0raW3uX3F4l6zL/Hi5eIQfM60PsHb2QiVPNa+Mn6lVAK3oYXn4mUZMVMxVwqIdblBog/aIV2kbvP1U+vF+plM/rwl/487lVf8AEVe8xKY7xGg5mF3UVtzVYmwQUZb/AIGMBFIX4FT+d/6ZNPRGRFXKvMWi2dNS26ouZcwvUW2ZeZdvmzjzzMy6l3uYZgcS6Zfapkw/csMVAGvAY4k8LhXL/J+5TBe4lMwCjB8WXSxxhwwHRcN2aljqDawzSjqFDQf4NsAODwXzAooicNxR78KTAkoNx1UDETH7D6GK01HOKXLxUsqtMMMvNkualzPqLN+SyvLkg3KAkuy/F3BwktrifhA2HMUSkYnCWRMS4A8GH03LdnhliZa8Xi+fFNKRzglm7l06yy1tkNbvxz8zWvHGvKNQuxzHfjBLm0dahLEGcAWsuLvDjAPwfuIHuFCi4uKnqceeJeZdy8y7npLmM7l4hCqhLg3LmHyMHMLuXEhibxUK5X/E5+4kLTMTRiG4u5rUKu2JknUKY3AXdRNYgeYGb8t1iUrbAorwB58WrRG9fcRMMdTBzcypc/5I1gJrcrq+sfculJ4dn+CxY4Kl6uYF7i58N8RaLlxOfA1NbVL+56moXOJzLrxekoMy91FXgUtPhPSXDkqF4TXyagR3DSawqAbJui+5l+IlKm6garXh9Ss34b48N1guCWgylK1cBt7l0Kbi3MX5NsEZmBalAdsVMvEOEOH5ZziMvxcvqWuJxibmyLLzuXi44YlZTb4GxU7KFy8XLzjMHM5g5gy+Jx4058DUtcyYi3hFvB/c2e4rYSgGdQ9QtEYZU6mSiF3mq8pfMClb3C/VQswt+UtPFJkuX9RWtxVirEVSLdkNxi0WdL8nR9yxyy8xeoPE1llkvMWXOJeKl4ilTKbnYxFWGXK4mk3hltVcKbKgbzLPF1LlwSoQMuCICSKFINiQ+Nmo4YJ1/KB5g5GF3CquClDUS5rHjie5rj/NaJi7vUXHEWsTLfMVusQqxKvVY3I0/LHN4ldnEOgIvMuXuLWmXL5ikuVq7g9M9mIst/E21LvmC4vBmAdMu3wsK2h5FMTalhl/tg4vUWnM1LzLslwwzKVKRLClxytr+nuGDz32AcJL83KWDHOYI7iqzqJZqPctw4/yN8y1ViokaPC4zA14kpRXoDbHAqtdnIdv0RWq8DFw1Foj2xG0spMzPMvaW1XEd3c1FqOg3zLxccL8KU3mYNi3A9kumXmoMuaV4sE0Jbnm4UDEGGSDguYYJbcKcQgV0uE/QIBugDr09J1Fw7nIg9wtZJgYi0ZhnPmlX/hXMWqimXHMaUuPKNj1C4taKA7hvzuVVtW+nB9xbluSK3jMtzlqMX3Fv/C42ly59zFVtZ9tznxeKnMHYQsWalwygvMHMvqX3Blk34umCmpZ5zLGpiC8mPlFlRs3/wCDByvYfseklh7isitO5QFrMbGzXMG1Sy6jkrwzNwLSDeX6jnR8xWKOW7igIFRoHuOnhaXS+j/y4psLItriWSW6m4y5l4XmKVGLl3EWMVrly714vM4uXmXPiIILNeOZfkvqcQpL4l3LziXcHErFWRl6LjiIDm1S/wCD+UN6hscrkHDNiASaVFdTTApupaEK3hYBRdfMWUjlQlQXEcixjFUdzxOg7WGkiBj/AEfymKL6gDGxhhY9Ja5cvxcumLLsg5iAtj5JzLl5gal4g53nzcd+oBLJcWiXT4vxcvEvEvEuXHBD/mErIkQCnxLdFU/H/T7hYYBdz9J17lmoYXLuXiW/5LXmXTRKil1Frcaepgh1VwRoWvt6Dl9TS1hdH/moJLBDEaRP/Y0xcxbxLl2xcXbLI0LnpPaXWSG3U7XUvV+px/nxLxPXjjIEWQQxLi3LljuXEfiXLzLIOZjexP2CPbiMRLuOkItVfQnSckpekLq97/qCumAkO4S+opeNQwxZeNzJUoPcbhhMh5mbt6PbGyRs/H6OX3DSmLgCVoggqNj4PGGs+c7oLWMz4S3RLtnMu8RQLdRu6xLuGCDBp8X3LxN3mXxLol5lxYKwZaVuW+jDa5TEsPqKXEOxBxuDW01wzarzFS4C+7X+JmZIVKGmEw2HMSAwdYg0jSRCquW+bp+4UabLlenph2gjJuW7ZaqtlzlinbArEItFroD2wNtpE/H5e9R6i5YqD8MGYbSjLMpCl3KqsWPViR5XLHMslkFSuJtLl5zLzmAZRu5ZmX7l1LziDL5i4l+F5i1Li9y4tyw2NMoVgziWS4JWPA2wxjM+JaS7img+AP7lhL8QUp+IwwY4gx6QlbW2/XoY3emNi9m4LrHFp81qUvDBNnZlofbKZXgfF/D+InzzLft7fMy+4TvCEwS/X5mIgstxxNWtpfQ/3L8LlsuiXnzrm5dteYtzSLnuNKMG2U7lIriDniXWDMvnM/SXpuCVtIJXgOd57i03HwyghhJbwy/iXLLxL4gwzqMoU43TdU9anJMmdy2WlksFEMsXEdIkVNTv/iLfNbgUTeAX5KZhm6BHbuTv93EdpbtH4sSpEl7MymIQArE11ScZTAkAGZbVbRdYl+5cWLiLPuVC1xFHCWZzLHTKpT4WzM5gBvxeMS3ROZqcTc+pdRmpfHhKxAd4fN4uXNMGpmXWfj7On3AwahfS9J/cbWILcS8gOG+paiMQRidZR8ipRwQpghDMLGCLwQop/MMFH6hJaYmKjEsEqFAvbtdByxfoQOf5r64jqXQRaalzbACjLFVtmo9xTicQ9T3MXLtxNGYNQviXP//Z"></div></div>
+<script>
+(function(){var d=document,r=d.documentElement,s=d.getElementById('splash');if(!s)return;r.classList.add('sp-lock');
+function done(){if(s&&s.parentNode)s.parentNode.removeChild(s);r.classList.remove('sp-lock');s=null}
+setTimeout(done,1050);})();
+</script>
+<div class="layout">
+<aside id="nav"></aside>
+<main id="main"><div id="boot" style="padding:30px;font-size:1.1rem">جارٍ التحميل… / Loading…</div><noscript><div style="padding:30px;color:#b02525;font-size:1.1rem"><b>JavaScript معطّل.</b> افتح هذا الملف بمتصفح عادي (Chrome أو Safari أو Edge) وليس من معاينة الملفات أو التطبيقات. / JavaScript is disabled. Open this file in a regular browser (Chrome, Safari, Edge), not in a file previewer or an app.</div></noscript></main>
+</div>
+
+<script>
+window.onerror=function(m,u,l,c){var b=document.getElementById('boot')||document.body.insertBefore(document.createElement('div'),document.body.firstChild);b.style.cssText='padding:20px;margin:20px;background:#ffe3e3;border:2px solid #e03131;border-radius:12px;font:16px sans-serif;direction:ltr;text-align:left';b.innerHTML='<b>Error / خطأ:</b> '+String(m)+' (line '+l+')<br>Please send this message to the developer. / أرسل هذه الرسالة للمطوّر.'};
+</script>
+<script>
+'use strict';
+/* =====================  أدوات  ===================== */
+const R16=['AX','BX','CX','DX','SI','DI','BP','SP','DS','ES','SS','CS'];
+const R8=['AL','AH','BL','BH','CL','CH','DL','DH'];
+const SEGS=['DS','ES','SS','CS'];
+const hex=(n,w=4)=>((n>>>0).toString(16).toUpperCase()).padStart(w,'0');
+const H=(n,w=4)=>hex(n,w)+'H';
+const c=t=>`<span class="c">${t}</span>`;
+const esc=s=>String(s).replace(/[&<>]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[m]));
+class Err{constructor(msg,fix){this.msg=msg;this.fix=fix}}
+
+function newState(cfg){
+  const regs={};R16.forEach(r=>regs[r]=0);Object.assign(regs,cfg.regs||{});
+  const mem=new Map();
+  (cfg.memSeed||[]).forEach(([a,...bs])=>bs.forEach((b,i)=>mem.set(a+i,b)));
+  return {regs,mem,pattern:cfg.memDefault==='pattern',inValue:(cfg.inValue!=null?cfg.inValue:0),ports:{},outVal:null,fl:Object.assign({CF:false,PF:false,AF:false,ZF:false,SF:false,OF:false},cfg.fl||{})};
+}
+function getReg(st,n){
+  if(R16.includes(n))return st.regs[n];
+  const base={A:'AX',B:'BX',C:'CX',D:'DX'}[n[0]];
+  return n[1]==='L'?st.regs[base]&255:st.regs[base]>>8;
+}
+function setReg(st,n,v){
+  if(R16.includes(n)){st.regs[n]=v&0xFFFF;return}
+  const base={A:'AX',B:'BX',C:'CX',D:'DX'}[n[0]];
+  if(n[1]==='L')st.regs[base]=(st.regs[base]&0xFF00)|(v&255);
+  else st.regs[base]=(st.regs[base]&0x00FF)|((v&255)<<8);
+}
+const rdB=(st,a)=>{a&=0xFFFFF;return st.mem.has(a)?st.mem.get(a):(st.pattern?((a*53+17)&255):0)};
+const rdMem=(st,a,size)=>{let v=0;for(let i=0;i<size/8;i++)v|=rdB(st,a+i)<<(8*i);return v};
+const wrMem=(st,a,v,size)=>{for(let i=0;i<size/8;i++)st.mem.set((a+i)&0xFFFFF,(v>>(8*i))&255)};
+
+/* ===== قراءة المعاملات ===== */
+function parseNum(s){
+  s=s.trim().toUpperCase();
+  if(/^0X[0-9A-F]+$/.test(s))return parseInt(s.slice(2),16);
+  if(/^[0-9A-F]+H$/.test(s))return parseInt(s.slice(0,-1),16);
+  if(/^[01]+B$/.test(s))return parseInt(s.slice(0,-1),2);
+  if(/^\d+$/.test(s))return parseInt(s,10);
+  return NaN;
+}
+function parseOperand(raw){
+  let u=raw.trim().toUpperCase().replace(/\s+/g,' ');
+  if(!u)throw new Err(L('في معامل ناقص (Operand) بالتعليمة.','يوجد معامل (Operand) ناقص في التعليمة.','An operand is missing from the instruction.'));
+  let ptr=null;const pm=u.match(/^(BYTE|WORD) PTR\s*(.*)$/);
+  if(pm){ptr=pm[1];u=pm[2]}
+  if(R16.includes(u))return {k:'reg',n:u,size:16,seg:SEGS.includes(u),raw:u};
+  if(R8.includes(u))return {k:'reg',n:u,size:8,raw:u};
+  if(u.startsWith('[')||u.includes('[')){
+    u=u.replace(/\]\s*\[/g,'+');
+    const m=u.match(/^\[(.*)\]$/);
+    if(!m)throw new Err(L('صيغة الذاكرة لازم تكون بين أقواس مربعة مثل [BX+SI+10H].','يجب أن توضع صيغة الذاكرة بين أقواس مربعة مثل [BX+SI+10H].','A memory operand must be inside square brackets, e.g. [BX+SI+10H].'));
+    const inner=m[1].replace(/\s+/g,'');
+    if(!inner)throw new Err(L('الأقواس [ ] فاضية.','الأقواس [ ] فارغة.','The brackets [ ] are empty.'));
+    const terms=inner.split(/(?=[+-])/);
+    let base=null,idx=null,disp=0,hasDisp=false,dispRaw='';
+    for(let t of terms){
+      let sg=1;if(t[0]==='-'){sg=-1;t=t.slice(1)}else if(t[0]==='+')t=t.slice(1);
+      if(['BX','BP'].includes(t)){if(sg<0)throw new Err(L('ما نگدر نطرح رجستر.','لا يمكن طرح سجل.','A register cannot be subtracted.'));if(base)throw new Err(L('داخل [ ] مسموح base واحد بس (BX أو BP).','يُسمح داخل [ ] بسجل أساس واحد فقط (BX أو BP).','Only one base register (BX or BP) is allowed inside [ ].'));base=t}
+      else if(['SI','DI'].includes(t)){if(sg<0)throw new Err(L('ما نگدر نطرح رجستر.','لا يمكن طرح سجل.','A register cannot be subtracted.'));if(idx)throw new Err(L('داخل [ ] مسموح index واحد بس (SI أو DI).','يُسمح داخل [ ] بسجل فهرس واحد فقط (SI أو DI).','Only one index register (SI or DI) is allowed inside [ ].'));idx=t}
+      else if(R16.includes(t)||R8.includes(t))throw new Err(L(`ما نگدر نستخدم ${t} داخل [ ]. المسموح بس: BX, BP, SI, DI.`,`لا يمكن استخدام ${t} داخل [ ]؛ المسموح فقط: BX, BP, SI, DI.`,`${t} cannot be used inside [ ]; only BX, BP, SI and DI are allowed.`));
+      else{const v=parseNum(t);if(isNaN(v))throw new Err(L(`ما فهمت "${t}" داخل الأقواس. اكتب الأرقام Hex مع H مثل 20H.`,`تعذّر فهم "${t}" داخل الأقواس. اكتب الأعداد بالنظام Hex مع الحرف H مثل 20H.`,`Cannot understand "${t}" inside the brackets. Write hex numbers with an H suffix, e.g. 20H.`));disp+=sg*v;hasDisp=true;dispRaw=(sg<0?'-':'')+t}
+    }
+    let mode;
+    if(!base&&!idx){if(!hasDisp)throw new Err('الأقواس فاضية.');mode='Direct'}
+    else if(base&&idx)mode='Based Indexed';
+    else if(!hasDisp)mode='Register Indirect';
+    else if(base)mode='Based';
+    else mode='Indexed';
+    let dispExt=0,signExt=false,bits=0;
+    if(hasDisp){
+      if(mode==='Direct'){if(disp<0||disp>0xFFFF)throw new Err(L('العنوان المباشر لازم يكون 16-bit (لحد FFFFH).','يجب أن يكون العنوان المباشر بعرض 16 بتاً (حتى FFFFH).','A direct address must be 16-bit (up to FFFFH).'));dispExt=disp;bits=16}
+      else if(disp<0){if(disp<-0x8000)throw new Err(L('الـ displacement كبير.','الإزاحة (displacement) كبيرة جداً.','The displacement is too large.'));dispExt=disp&0xFFFF;signExt=true;bits=8}
+      else if(disp>0xFFFF)throw new Err(L('الـ displacement لازم يكون 16-bit (لحد FFFFH).','يجب أن تكون الإزاحة بعرض 16 بتاً (حتى FFFFH).','The displacement must be 16-bit (up to FFFFH).'));
+      else if(disp<=0xFF){dispExt=disp>=0x80?(0xFF00|disp):disp;signExt=true;bits=8}
+      else{dispExt=disp;bits=16}
+    }
+    return {k:'mem',mode,base,idx,disp,hasDisp,dispRaw,dispExt,signExt,bits,seg:base==='BP'?'SS':'DS',ptr,inner:m[1].trim(),raw:'['+m[1].trim()+']'};
+  }
+  const v=parseNum(u);
+  if(isNaN(v))throw new Err(L(`ما فهمت المعامل "${raw.trim()}". استخدم رجستر، أو رقم مثل 20H، أو ذاكرة مثل [BX].`,`تعذّر فهم المعامل "${raw.trim()}". استخدم سجلاً أو عدداً مثل 20H أو ذاكرة مثل [BX].`,`Cannot understand the operand "${raw.trim()}". Use a register, a number such as 20H, or memory such as [BX].`));
+  return {k:'imm',val:v,raw:u};
+}
+const sz=s=>s===8?'Byte (8-bit)':'Word (16-bit)';
+const vx=(v,s)=>H(v,s/4);
+const descOp=o=>o.k==='mem'?`[${esc(o.inner)}]`:esc(o.raw);
+
+/* ===== التنفيذ ===== */
+function analyze(text,st){
+  try{return analyze2(text,st)}
+  catch(e){if(e instanceof Err)return {error:e.msg,fix:e.fix};throw e}
+}
+const SUPPORTED='MOV, XCHG, PUSH, POP, LEA, LDS, LES, IN, OUT, ADD, ADC, SUB, SBB, INC, DEC, CMP, NEG, MUL, IMUL, DIV, IDIV, NOT, AND, OR, XOR, TEST, SHL, SAL, SHR, SAR, RCL, RCR, ROL, ROR, STC, CLC, CMC';
+function analyze2(text,st){
+  text=text.replace(/;.*$/,'').trim();
+  if(!text)throw new Err('اكتب تعليمة أول (مثل MOV AX, 1234H).');
+  const m=text.match(/^([A-Za-z]+)\s*(.*)$/);
+  if(!m)throw new Err('ما فهمت التعليمة.');
+  const mn=m[1].toUpperCase();
+  if(ENG!=='d'&&!BI_OK.includes(mn))throw new Err(L('','هذا القسم يدعم MOV وتعليمات الحساب والمنطق والإزاحة فقط.','This section supports MOV and the arithmetic, logic and shift instructions only.'));
+  const ops=m[2].trim()?m[2].split(',').map(parseOperand):[];
+  const need=n=>{if(ops.length!==n)throw new Err(L(`${mn} تحتاج ${n===1?'معامل واحد':n===0?'بدون معاملات':'معاملين'} (Operands).`,`تحتاج ${mn} إلى ${n} معامل(ات).`,`${mn} needs exactly ${n} operand(s).`))};
+  const TX=(mn+' '+m[2].trim()).trim();
+  switch(mn){
+    case'MOV':need(2);return doMOV(ops[0],ops[1],st,TX);
+    case'XCHG':need(2);return doXCHG(ops[0],ops[1],st,TX);
+    case'PUSH':need(1);return doPUSH(ops[0],st,TX);
+    case'POP':need(1);return doPOP(ops[0],st,TX);
+    case'LEA':need(2);return doLEA(ops[0],ops[1],st,TX);
+    case'LDS':case'LES':need(2);return doLDS(mn,ops[0],ops[1],st,TX);
+    case'IN':need(2);return doIN(ops[0],ops[1],st,TX);
+    case'OUT':need(2);return doOUT(ops[0],ops[1],st,TX);
+    case'ADD':case'ADC':case'SUB':case'SBB':case'CMP':case'AND':case'OR':case'XOR':case'TEST':need(2);return doALU2(mn,ops[0],ops[1],st,TX);
+    case'INC':case'DEC':case'NEG':case'NOT':need(1);return doUnary(mn,ops[0],st,TX);
+    case'MUL':case'IMUL':case'DIV':case'IDIV':need(1);return doMulDiv(mn,ops[0],st,TX);
+    case'SHL':case'SAL':case'SHR':case'SAR':case'RCL':case'RCR':case'ROL':case'ROR':need(2);return doShift(mn,ops[0],ops[1],st,TX);
+    case'STC':case'CLC':case'CMC':need(0);return doFlagOp(mn,st,TX);
+    default:throw new Err(L(`التعليمة ${mn} مو مدعومة بهذا الملف. المدعومة: ${SUPPORTED}.`,`التعليمة ${mn} غير مدعومة في هذا الملف. المدعومة: ${SUPPORTED}.`,`The instruction ${mn} is not supported in this file. Supported: ${SUPPORTED}.`));
+  }
+}
+/* ===== language-aware engine (ENG: 'd' = Iraqi dialect, 'f' = Fusha, 'en' = English) ===== */
+let ENG='d';
+const L=(d,f,e)=>ENG==='en'?e:ENG==='f'?f:d;
+const N=(f,e)=>L(f,f,e);
+const BI_OK=['MOV','ADD','ADC','SUB','SBB','INC','DEC','CMP','NEG','MUL','IMUL','DIV','IDIV','NOT','AND','OR','XOR','TEST','SHL','SAL','SHR','SAR','RCL','RCR','ROL','ROR','STC','CLC','CMC'];
+const bg=(v,n)=>{let h='<span class="g">';for(let i=n-1;i>=0;i--){h+=`<span class="bt">${(v>>i)&1}</span>`;if(i%4===0&&i)h+='</span><span class="g">'}return h+'</span>'};
+const brow=(lb,v,n,cf)=>`<div class="bits"><span class="lb">${lb}</span>${cf===undefined?'':`<span class="bt cy" title="CF">${cf?1:0}</span>`}${bg(v,n)}<span class="mono">= ${H(v,n/4)}</span></div>`;
+const FLN=['CF','PF','AF','ZF','SF','OF'];
+
+function memAccess(op,st){
+  const parts=[],vals=[],hi=[];let sum=0;
+  if(op.base){const v=getReg(st,op.base);parts.push(`(${op.base})`);vals.push(H(v));sum+=v;hi.push(op.base)}
+  if(op.idx){const v=getReg(st,op.idx);parts.push(`(${op.idx})`);vals.push(H(v));sum+=v;hi.push(op.idx)}
+  if(op.hasDisp&&op.mode!=='Direct'){parts.push(H(op.dispExt));vals.push(H(op.dispExt));sum+=op.dispExt}
+  if(op.mode==='Direct')sum=op.dispExt;
+  const ea=sum&0xFFFF,sv=getReg(st,op.seg),ba=sv*16,pa=(ba+ea)&0xFFFFF;
+  let ext='';
+  if(op.mode!=='Direct'&&op.hasDisp){
+    const dr=c(esc(op.dispRaw)),de=c(H(op.dispExt));
+    ext=op.signExt?L(`الـ displacement ${dr} هو 8-bit، فينعمل له <b>Sign Extension</b> لـ 16-bit ويصير ${de}`,
+        `الإزاحة (displacement) ${dr} بحجم 8 بتات، فتُمدَّد بالإشارة (<b>Sign Extension</b>) إلى 16 بتاً: ${de}`,
+        `The 8-bit displacement ${dr} is <b>sign-extended</b> to 16 bits: ${de}`)
+      :L(`الـ displacement ${dr} هو 16-bit، ما يحتاج Sign Extension.`,`الإزاحة ${dr} بحجم 16 بتاً ولا تحتاج إلى مدّ إشارة.`,`The displacement ${dr} is 16-bit; no sign extension is needed.`);
+  }
+  let eaL;
+  if(op.mode==='Direct')eaL=`EA = <b>${H(ea)}</b>`;
+  else if(op.mode==='Register Indirect')eaL=`EA = ${parts[0]} = <b>${H(ea)}</b>`;
+  else eaL=`EA = ${parts.join(' + ')} = ${vals.join(' + ')} = <b>${H(ea)}</b>`;
+  const eaNote=sum>0xFFFF?L('نشيل الـ carry لأن EA بس 16-bit.','نُهمل الرقم المحمول لأن EA بعرض 16 بتاً فقط.','The carry is dropped because EA is only 16 bits wide.'):'';
+  const why=op.seg==='SS'?L('لأن BP يستخدم الـ Stack Segment (SS) تلقائياً','لأن BP يستخدم مقطع المكدّس SS تلقائياً','BP uses the stack segment SS by default'):L('الـ Segment الافتراضي للبيانات هو DS','المقطع الافتراضي للبيانات هو DS','DS is the default data segment');
+  const baL=`BA = (${op.seg}) × 10H = ${H(sv)} × 10H = <b>${H(ba,5)}</b>`;
+  const paL=`PA = BA + EA = ${H(ba,5)} + ${H(ea)} = <b>${H(pa,5)}</b>`;
+  return {ea,pa,ba,sv,hi,ext,eaL,baL,paL,why,eaNote};
+}
+function memSteps(op,st,size,rw){
+  const m=memAccess(op,st);
+  const steps=[
+    {html:`<div class="l"><b>${L('نحسب الـ Effective Address (EA)','نحسب العنوان الفعّال (EA)','Compute the Effective Address (EA)')}</b> – ${'<span class="tag">'+op.mode+'</span>'}</div>${m.ext?`<div class="l">${m.ext}</div>`:''}<div class="l f">${m.eaL}</div>${m.eaNote?`<div class="l mini">${m.eaNote}</div>`:''}`,hi:m.hi},
+    {html:`<div class="l"><b>${L('نحسب الـ Base Address (BA) من الـ Segment Register','نحسب العنوان الأساسي (BA) من سجل المقطع','Compute the Base Address (BA) from the segment register')}</b></div><div class="l f">${m.baL}</div><div class="l mini">${m.why}.</div>`,hi:[op.seg]},
+    {html:`<div class="l"><b>${L('نجمع ونطلع الـ Physical Address (20-bit) اللي يروح على الـ Address Bus','نجمع فنحصل على العنوان الفيزيائي (Physical Address) بعرض 20 بتاً ويخرج على Address Bus','Add them to get the 20-bit Physical Address placed on the address bus')}</b></div><div class="l f">${m.paL}</div>`,hi:[op.seg],mem:{pa:m.pa,size,rw}}
+  ];
+  return {m,steps};
+}
+function opSize(a,b,mn){
+  const sa=a.k==='reg'?a.size:null,sb=b.k==='reg'?b.size:null;
+  if(sa&&sb&&sa!==sb)throw new Err(L(`الحجم مو متساوي: ${a.n} ${sa}-bit بس ${b.n} ${sb}-bit. ${mn} تحتاج الاثنين بنفس الحجم (8 مع 8 أو 16 مع 16).`,
+    `حجما المعاملين غير متساويين: ${a.n} بعرض ${sa} بتاً و ${b.n} بعرض ${sb} بتاً. تتطلب ${mn} الحجم نفسه (8 مع 8 أو 16 مع 16).`,
+    `Operand sizes differ: ${a.n} is ${sa}-bit but ${b.n} is ${sb}-bit. ${mn} needs the same size (8 with 8, or 16 with 16).`));
+  let s=sa||sb;
+  if(!s){const p=a.ptr||b.ptr;if(p)s=p==='BYTE'?8:16}
+  if(!s)throw new Err(L('الحجم مو واضح (ما عدنا رجستر نعرف منه). حدد الحجم بـ <code dir="ltr">BYTE PTR</code> أو <code dir="ltr">WORD PTR</code> مثل: <code dir="ltr">MOV BYTE PTR [BX], 5</code>',
+    'حجم المعامل غير واضح (لا يوجد سجل يحدّده). حدّده بـ <code dir="ltr">BYTE PTR</code> أو <code dir="ltr">WORD PTR</code> مثل: <code dir="ltr">MOV BYTE PTR [BX], 5</code>',
+    'The operand size is ambiguous (no register fixes it). Specify <code dir="ltr">BYTE PTR</code> or <code dir="ltr">WORD PTR</code>, e.g. <code dir="ltr">MOV BYTE PTR [BX], 5</code>'));
+  return s;
+}
+function doMOV(d,s,st,T){
+  if(d.k==='imm')throw new Err(L('الهدف (Destination) ما يصير يكون رقم، لازم رجستر أو ذاكرة.','لا يجوز أن يكون الهدف (Destination) رقماً؛ يجب أن يكون سجلاً أو موضعاً في الذاكرة.','The destination cannot be a number; it must be a register or a memory location.'));
+  if(d.k==='mem'&&s.k==='mem')throw new Err(L('ممنوع تنسخ من مكان ذاكرة لمكان ذاكرة مباشرة (Memory ← Memory).','يُمنع النسخ من الذاكرة إلى الذاكرة مباشرة (Memory ← Memory).','Direct memory-to-memory transfer is not allowed.'),
+    `${L('الحل: مرر القيمة عبر رجستر:','الحل: تُمرَّر القيمة عبر سجل:','Fix: pass the value through a register:')}<br><span class="c">MOV AX, ${descOp(s)}</span> ${L('ثم','ثم','then')} <span class="c">MOV ${descOp(d)}, AX</span>`);
+  if(d.k==='reg'&&d.n==='CS')throw new Err(L('الـ CS ما يصير يكون Destination بتعليمة MOV. الـ CS يتغير بس مع تعليمات مثل JMP و CALL.','لا يجوز أن يكون CS هدفاً للتعليمة MOV؛ فهو لا يتغيّر إلا بتعليمات مثل JMP و CALL.','CS cannot be the destination of MOV; it changes only through instructions such as JMP and CALL.'));
+  if(d.seg&&s.k==='imm')throw new Err(L('ممنوع تحط رقم مباشر (Immediate) بـ Segment Register.','يُمنع نقل رقم مباشر (Immediate) إلى سجل مقطع (Segment Register).','An immediate value cannot be moved directly into a segment register.'),
+    `${L('الحل: خلي الرقم برجستر عام أول:','الحل: نضع الرقم في سجل عام أولاً:','Fix: load the value into a general register first:')}<br><span class="c">MOV AX, ${esc(s.raw)}</span> ${L('ثم','ثم','then')} <span class="c">MOV ${d.n}, AX</span>`);
+  if(d.seg&&s.k==='reg'&&s.seg)throw new Err(L('ممنوع تنسخ Segment Register لـ Segment Register ثاني مباشرة.','يُمنع نسخ سجل مقطع إلى سجل مقطع آخر مباشرة.','A segment register cannot be copied directly to another segment register.'),
+    `${L('الحل: عبر رجستر عام:','الحل: عبر سجل عام:','Fix: go through a general register:')}<br><span class="c">MOV AX, ${s.n}</span> ${L('ثم','ثم','then')} <span class="c">MOV ${d.n}, AX</span>`);
+  const size=opSize(d,s,'MOV');
+  let sv=null;
+  if(s.k==='imm'){
+    const mask=size===8?0xFF:0xFFFF;
+    if(s.val>mask)throw new Err(L(`الرقم ${esc(s.raw)} أكبر من ${size}-bit ما يدخل بـ ${d.k==='reg'?d.n:'الهدف'}.`,`الرقم ${esc(s.raw)} أكبر من أن يتسع في ${size} بتات.`,`The number ${esc(s.raw)} does not fit in ${size} bits.`));
+    sv=s.val&mask;
+  }
+  const mo=d.k==='mem'?d:(s.k==='mem'?s:null);
+  const rw=s.k==='mem'?'Read':(d.k==='mem'?'Write':null);
+  const steps=[];
+  const mode=mo?mo.mode:(s.k==='imm'?'Immediate':'Register');
+  const rwTag=rw?`<span class="tag ${rw==='Read'?'g':'o'}">${rw}</span>`:'';
+  steps.push({html:L(
+    `<div class="l">التعليمة ${c(esc(T))}</div><div class="l">الهدف (Destination) = <b>${descOp(d)}</b> ، المصدر (Source) = <b>${descOp(s)}</b></div><div class="l">الحجم = <b>${sz(size)}</b> ${rw?`، نوع النقل = ${rwTag}`:''}</div><div class="l">نمط العنونة: <span class="tag">${mode}</span></div>`,
+    `<div class="l">التعليمة ${c(esc(T))}</div><div class="l">الهدف (Destination) = <b>${descOp(d)}</b> ، المصدر (Source) = <b>${descOp(s)}</b></div><div class="l">الحجم = <b>${sz(size)}</b> ${rw?`، نوع النقل = ${rwTag}`:''}</div><div class="l">نمط العنونة (Addressing mode): <span class="tag">${mode}</span></div>`,
+    `<div class="l">Instruction ${c(esc(T))}</div><div class="l">Destination = <b>${descOp(d)}</b>, Source = <b>${descOp(s)}</b></div><div class="l">Size = <b>${sz(size)}</b>${rw?`, transfer type = ${rwTag}`:''}</div><div class="l">Addressing mode: <span class="tag">${mode}</span></div>`),hi:[]});
+  let ma=null;
+  if(mo){const r=memSteps(mo,st,size,rw==='Read'?'rd':'wr');ma=r.m;steps.push(...r.steps)}
+  let v;
+  if(s.k==='reg')v=getReg(st,s.n);else if(s.k==='imm')v=sv;else v=rdMem(st,ma.pa,size);
+  if(s.k==='reg')steps.push({html:`<div class="l">${L('نقرا محتوى المصدر','نقرأ محتوى المصدر','Read the source')} <b>${s.n}</b> = <b>${vx(v,size)}</b></div>`,hi:[s.n]});
+  else if(s.k==='imm')steps.push({html:`<div class="l">${L('القيمة جاية من التعليمة نفسها (Immediate)','القيمة مأخوذة من التعليمة نفسها (Immediate)','The value comes from the instruction itself (Immediate)')} = <b>${vx(v,size)}</b></div>`,hi:[]});
+  else if(size===8)steps.push({html:`<div class="l">${L('نقرا Byte من الذاكرة بالعنوان','نقرأ Byte من الذاكرة بالعنوان','Read a byte from memory at address')} ${c(H(ma.pa,5))}:</div><div class="l f">[${H(ma.pa,5)}] = ${H(v,2)}</div>`,hi:[],mem:{pa:ma.pa,size,rw:'rd'}});
+  else steps.push({html:`<div class="l">${L('نقرا Word من الذاكرة','نقرأ Word من الذاكرة','Read a word from memory')}: ${L('البايت الواطي من','البايت الأدنى من','low byte from')} ${c(H(ma.pa,5))} = <b>${H(v&255,2)}</b> ${L('والعالي من','والأعلى من','and high byte from')} ${c(H(ma.pa+1,5))} = <b>${H(v>>8,2)}</b></div><div class="l">${L('القيمة','القيمة','Value')} = <b>${vx(v,size)}</b> <span class="mini">${L('(Little Endian: الواطي ينخزن بالعنوان الأصغر)','(Little Endian: يُخزَّن البايت الأدنى في العنوان الأصغر)','(Little Endian: the low byte is stored at the lower address)')}</span></div>`,hi:[],mem:{pa:ma.pa,size,rw:'rd'}});
+  if(d.k==='reg'){const old=getReg(st,d.n);steps.push({html:`<div class="l">${L('نكتب القيمة بالهدف:','نكتب القيمة في الهدف:','Write the value into the destination:')}</div><div class="l f">(${d.n}) ← ${vx(v,size)}</div><div class="l mini">${L('القيمة القديمة كانت','القيمة السابقة كانت','The old value was')} ${c(vx(old,size))} ${L('وصارت','وأصبحت','and is now')} ${c(vx(v,size))}</div>`,hi:[d.n]})}
+  else steps.push({html:`<div class="l">${L('نكتب القيمة بالذاكرة:','نكتب القيمة في الذاكرة:','Write the value into memory:')}</div><div class="l f">(${H(ma.pa,5)}) ← ${vx(v,size)}</div>${size===16?`<div class="l mini">${L('البايت الواطي','البايت الأدنى','The low byte')} ${c(H(v&255,2))} ${L('ينكتب بالعنوان','يُكتب في العنوان','goes to address')} ${c(H(ma.pa,5))} ${L('والعالي','والأعلى','and the high byte')} ${c(H(v>>8,2))} ${L('بالعنوان','في العنوان','to address')} ${c(H(ma.pa+1,5))}</div>`:''}`,hi:[],mem:{pa:ma.pa,size,rw:'wr'}});
+  const commit=()=>{if(d.k==='reg')setReg(st,d.n,v);else wrMem(st,ma.pa,v,size)};
+  return {steps,commit,info:{mode,size,rw,ea:ma?ma.ea:null,pa:ma?ma.pa:null,ma,seg:mo?mo.seg:null}};
+}
+
+/* ===== ALU core with carry-in ===== */
+function aluFull(op,a,b,size,cin){
+  const mask=size===8?0xFF:0xFFFF,msb=size===8?0x80:0x8000;a&=mask;b&=mask;cin=cin?1:0;
+  let res,CF=false,OF=false,AF=false,undef=[],r;
+  switch(op){
+    case'ADD':case'ADC':{const ci=op==='ADC'?cin:0;r=a+b+ci;res=r&mask;CF=r>mask;OF=((a^res)&(b^res)&msb)!==0;AF=((a^b^res)&0x10)!==0;break}
+    case'SUB':case'SBB':case'CMP':{const ci=op==='SBB'?cin:0;r=a-b-ci;res=r&mask;CF=a<b+ci;OF=((a^b)&(a^res)&msb)!==0;AF=((a^b^res)&0x10)!==0;break}
+    case'AND':case'TEST':res=a&b;undef=['AF'];break;
+    case'OR':res=a|b;undef=['AF'];break;
+    default:res=a^b;undef=['AF'];
+  }
+  return {res,a,b,fl:{CF,PF:par(res&255)%2===0,AF,ZF:res===0,SF:(res&msb)!==0,OF},undef};
+}
+const FD={PF:0,AF:0,ZF:0,SF:0,OF:0};
+function flagStep(st,fl,aff,undef){
+  const parts=FLN.map(n=>aff.includes(n)?`${n}=${fl[n]?1:0}`:undef.includes(n)?`${n}=?`:`${n}=—`);
+  return {html:`<div class="l">${N('تُحدَّث الأعلام (Flags):','The flags are updated:')}</div><div class="l f">${parts.join('   ')}</div><div class="l mini">${N('الرمز — يعني أن العلم لا يتغيّر، والرمز ? يعني أنه غير معرَّف (undefined).','“—” means the flag is unchanged and “?” means it is undefined.')}</div>`,hi:[]};
+}
+const applyFl=(st,fl,aff)=>aff.forEach(n=>{st.fl[n]=!!fl[n]});
+const hiOf=(...ops)=>ops.filter(o=>o&&o.k==='reg').map(o=>o.n);
+const PURP={
+  ADD:['جمع المصدر إلى الهدف (بايت مع بايت أو كلمة مع كلمة).','Adds the source to the destination (byte to byte, or word to word).'],
+  ADC:['جمع المعاملين مع علم الحمل CF (Add with Carry).','Adds both operands plus the carry flag (Add with Carry).'],
+  SUB:['طرح المصدر من الهدف؛ ويعمل CF هنا كعلم استلاف (Borrow).','Subtracts the source from the destination; CF acts as the borrow flag.'],
+  SBB:['طرح المصدر والاستلاف السابق (CF) من الهدف (Subtract with Borrow).','Subtracts the source and the previous borrow (CF) from the destination.'],
+  CMP:['مقارنة بطرح المصدر من الهدف داخلياً؛ لا يتغيّر المعاملان، وتتغيّر الأعلام فقط.','Compares by internally subtracting the source from the destination; the operands do not change, only the flags.'],
+  AND:['عملية AND بين الهدف والمصدر بت ببت.','Bit-by-bit AND of destination and source.'],
+  OR:['عملية OR بين الهدف والمصدر بت ببت.','Bit-by-bit OR of destination and source.'],
+  XOR:['عملية XOR بين الهدف والمصدر بت ببت.','Bit-by-bit XOR of destination and source.'],
+  TEST:['عملية AND دون تخزين الناتج (Non-destructive)؛ تتغيّر الأعلام فقط.','AND without storing the result (non-destructive); only the flags change.']
+};
+const OPSYM={ADD:'+',ADC:'+',SUB:'−',SBB:'−',CMP:'−',AND:'AND',OR:'OR',XOR:'XOR',TEST:'AND'};
+function noSeg(mn,...ops){if(ops.some(o=>o.k==='reg'&&o.seg))throw new Err(N(`لا تعمل ${mn} مع سجلات المقاطع (Segment Registers).`,`${mn} does not work with segment registers.`))}
+function doALU2(mn,d,s,st,TX){
+  if(d.k==='imm')throw new Err(N('لا يجوز أن يكون الهدف (Destination) رقماً.','The destination cannot be a number.'));
+  if(d.k==='mem'&&s.k==='mem')throw new Err(N('لا يجوز أن يكون المعاملان في الذاكرة معاً.','Both operands cannot be memory locations at the same time.'),`${N('الحل: انقل أحدهما إلى سجل أولاً.','Fix: move one of them into a register first.')}`);
+  noSeg(mn,d,s);
+  const size=opSize(d,s,mn),w=size/4,mask=size===8?0xFF:0xFFFF;
+  let sv=null;
+  if(s.k==='imm'){if(s.val>mask)throw new Err(N(`الرقم ${esc(s.raw)} أكبر من أن يتسع في ${size} بتات.`,`The number ${esc(s.raw)} does not fit in ${size} bits.`));sv=s.val&mask}
+  const logic=['AND','OR','XOR','TEST'].includes(mn),store=!['CMP','TEST'].includes(mn);
+  const mo=d.k==='mem'?d:(s.k==='mem'?s:null);
+  const steps=[{html:`<div class="l">${N('التعليمة','Instruction')} ${c(esc(TX))}: ${N(PURP[mn][0],PURP[mn][1])}</div><div class="l">${N('الهدف','Destination')} = <b>${descOp(d)}</b> ، ${N('المصدر','Source')} = <b>${descOp(s)}</b> ، ${N('الحجم','size')} = <b>${sz(size)}</b></div>${mo?`<div class="l">${N('نمط العنونة (Addressing mode):','Addressing mode:')} <span class="tag">${mo.mode}</span></div>`:''}`,hi:[]}];
+  let ma=null;
+  if(mo){const r=memSteps(mo,st,size,(d.k==='mem'&&store)?'wr':'rd');ma=r.m;steps.push(...r.steps)}
+  const rdOp=o=>o.k==='reg'?getReg(st,o.n):o.k==='imm'?sv:rdMem(st,ma.pa,size);
+  const a=rdOp(d),b=rdOp(s),cin=st.fl.CF?1:0,uses=(mn==='ADC'||mn==='SBB');
+  const r=aluFull(mn,a,b,size,cin);
+  steps.push({html:`<div class="l">${N('نقرأ المعاملين:','Read both operands:')}</div><div class="l f">${descOp(d)} = ${H(a,w)} ,  ${descOp(s)} = ${H(b,w)}${uses?`  ,  CF = ${cin}`:''}</div>`,hi:hiOf(d,s),mem:ma?{pa:ma.pa,size,rw:'rd'}:undefined});
+  const sg=v=>size===8?(v>127?v-256:v):(v>32767?v-65536:v);
+  let eq=`${H(a,w)} ${OPSYM[mn]} ${H(b,w)}${uses?` ${mn==='ADC'?'+':'−'} CF(${cin})`:''} = <b>${H(r.res,w)}</b>`;
+  let dec=logic?'':`<div class="l mini f">unsigned: ${a} ${OPSYM[mn]} ${b}${uses?` ${mn==='ADC'?'+':'−'} ${cin}`:''} → ${mn==='ADD'||mn==='ADC'?a+b+(mn==='ADC'?cin:0):a-b-(mn==='SBB'?cin:0)}   |   signed: ${sg(a)} ${OPSYM[mn]} ${sg(b)}</div>`;
+  steps.push({html:`<div class="l">${N('نُجري العملية:','Perform the operation:')}</div><div class="l f">${eq}</div>${brow('A',a,size)}${brow('B',b,size)}${brow(N('الناتج','Result'),r.res,size)}${dec}`,hi:[]});
+  if(store)steps.push({html:`<div class="l">${N('نخزّن الناتج في الهدف:','Store the result in the destination:')}</div><div class="l f">${descOp(d)} ← ${H(r.res,w)}</div>`,hi:hiOf(d),mem:ma&&d.k==='mem'?{pa:ma.pa,size,rw:'wr'}:undefined});
+  else steps.push({html:`<div class="l">${N(`${mn} لا تخزّن الناتج؛ يبقى الهدف كما هو وتتغيّر الأعلام فقط.`,`${mn} does not store the result; the destination is unchanged and only the flags change.`)}</div>`,hi:[]});
+  const aff=FLN.filter(n=>!r.undef.includes(n));
+  steps.push(flagStep(st,r.fl,aff,r.undef));
+  return {steps,commit:()=>{if(store){if(d.k==='reg')setReg(st,d.n,r.res);else wrMem(st,ma.pa,r.res,size)}applyFl(st,r.fl,aff)},info:{res:r.res,fl:r.fl}};
+}
+function doUnary(mn,o,st,TX){
+  if(o.k==='imm')throw new Err(N('المعامل يجب أن يكون سجلاً أو موضعاً في الذاكرة.','The operand must be a register or a memory location.'));
+  noSeg(mn,o);
+  const size=o.k==='reg'?o.size:(o.ptr?(o.ptr==='BYTE'?8:16):null);
+  if(!size)throw new Err(N(`حجم المعامل غير واضح؛ استخدم BYTE PTR أو WORD PTR، مثل: ${mn} WORD PTR [SI]`,`The operand size is ambiguous; use BYTE PTR or WORD PTR, e.g. ${mn} WORD PTR [SI]`));
+  const w=size/4,mask=size===8?0xFF:0xFFFF,msb=size===8?0x80:0x8000;
+  const P={INC:['زيادة القيمة بمقدار 1. تتغيّر جميع أعلام الحالة ما عدا CF.','Increments the value by 1. All status flags are affected except CF.'],DEC:['إنقاص القيمة بمقدار 1. تتغيّر جميع أعلام الحالة ما عدا CF.','Decrements the value by 1. All status flags are affected except CF.'],NEG:['المتمم الثنائي (2’s complement)، أي تغيير إشارة العدد: 0 − القيمة.','Two’s complement: changes the sign of the number (0 − value).'],NOT:['المتمم الأحادي (1’s complement): تُقلب كل البتات. لا تتأثر الأعلام.','One’s complement: every bit is inverted. No flags are affected.']}[mn];
+  const steps=[{html:`<div class="l">${N('التعليمة','Instruction')} ${c(esc(TX))}: ${N(P[0],P[1])}</div><div class="l">${N('الحجم','Size')} = <b>${sz(size)}</b></div>`,hi:[]}];
+  let ma=null;
+  if(o.k==='mem'){const r=memSteps(o,st,size,'wr');ma=r.m;steps.push(...r.steps)}
+  const a=o.k==='reg'?getReg(st,o.n):rdMem(st,ma.pa,size);
+  let res,fl={},aff=[],undef=[];
+  if(mn==='INC'||mn==='DEC'){const r=aluOp(mn,a,1,size,st.fl.CF);res=r.res;fl=r.fl;aff=['PF','AF','ZF','SF','OF']}
+  else if(mn==='NEG'){res=(0-a)&mask;fl={CF:a!==0,OF:a===msb,AF:((a^res)&0x10)!==0,ZF:res===0,SF:(res&msb)!==0,PF:par(res&255)%2===0};aff=FLN.slice()}
+  else{res=(~a)&mask}
+  steps.push({html:`<div class="l">${N('نقرأ المعامل:','Read the operand:')}</div><div class="l f">${descOp(o)} = ${H(a,w)}</div>`,hi:hiOf(o),mem:ma?{pa:ma.pa,size,rw:'rd'}:undefined});
+  const sym={INC:'+ 1',DEC:'− 1',NEG:'0 −',NOT:'NOT'}[mn];
+  steps.push({html:`<div class="l">${N('نُجري العملية:','Perform the operation:')}</div><div class="l f">${mn==='NEG'?`0 − ${H(a,w)}`:mn==='NOT'?`NOT ${H(a,w)}`:`${H(a,w)} ${sym}`} = <b>${H(res,w)}</b></div>${brow(N('قبل','Before'),a,size)}${brow(N('بعد','After'),res,size)}${mn==='NEG'?`<div class="l mini">${N('تذكير: المتمم الثنائي = المتمم الأحادي + 1.','Reminder: two’s complement = one’s complement + 1.')}</div>`:''}`,hi:[]});
+  steps.push({html:`<div class="l">${N('نخزّن الناتج:','Store the result:')}</div><div class="l f">${descOp(o)} ← ${H(res,w)}</div>`,hi:hiOf(o),mem:ma?{pa:ma.pa,size,rw:'wr'}:undefined});
+  if(mn==='NOT')steps.push({html:`<div class="l">${N('لا تتأثر الأعلام بالتعليمة NOT.','NOT does not affect any flag.')}</div>`,hi:[]});
+  else{
+    if(mn==='INC'||mn==='DEC')undef=[];
+    steps.push(flagStep(st,fl,aff,undef));
+    if(mn==='INC'||mn==='DEC')steps[steps.length-1].html+=`<div class="l mini">${N('لاحظ: يبقى CF كما كان.','Note: CF keeps its old value.')}</div>`;
+  }
+  return {steps,commit:()=>{if(o.k==='reg')setReg(st,o.n,res);else wrMem(st,ma.pa,res,size);applyFl(st,fl,aff)}};
+}
+function doMulDiv(mn,o,st,TX){
+  if(o.k==='imm')throw new Err(N(`${mn} لا تقبل رقماً مباشراً؛ ضعه في سجل أولاً.`,`${mn} does not accept an immediate; put the number in a register first.`));
+  noSeg(mn,o);
+  const size=o.k==='reg'?o.size:(o.ptr?(o.ptr==='BYTE'?8:16):null);
+  if(!size)throw new Err(N(`حجم المعامل غير واضح؛ استخدم BYTE PTR أو WORD PTR.`,`The operand size is ambiguous; use BYTE PTR or WORD PTR.`));
+  const signed=mn==='IMUL'||mn==='IDIV',div=mn==='DIV'||mn==='IDIV',mask=size===8?0xFF:0xFFFF;
+  const sg=(v,n)=>n===8?(v>127?v-256:v):n===16?(v>32767?v-65536:v):(v>2147483647?v-4294967296:v);
+  const impl=div?(size===8?N(`المقسوم في ${c('AX')} ، فيكون الخارج في ${c('AL')} والباقي في ${c('AH')}.`,`The dividend is in ${c('AX')}: the quotient goes to ${c('AL')} and the remainder to ${c('AH')}.`):N(`المقسوم في ${c('DX:AX')} ، فيكون الخارج في ${c('AX')} والباقي في ${c('DX')}.`,`The dividend is in ${c('DX:AX')}: the quotient goes to ${c('AX')} and the remainder to ${c('DX')}.`))
+              :(size===8?N(`${c('AX = AL × Src')} والناتج بعرض 16 بتاً.`,`${c('AX = AL × Src')}: the result is 16 bits wide.`):N(`${c('DX:AX = AX × Src')} والناتج بعرض 32 بتاً.`,`${c('DX:AX = AX × Src')}: the result is 32 bits wide.`));
+  const steps=[{html:`<div class="l">${N('التعليمة','Instruction')} ${c(esc(TX))} — ${signed?N('عملية بإشارة (signed)','signed operation'):N('عملية بلا إشارة (unsigned)','unsigned operation')}</div><div class="l">${impl}</div><div class="l">${N('الحجم','Size')} = <b>${sz(size)}</b></div>`,hi:[]}];
+  let ma=null;
+  if(o.k==='mem'){const r=memSteps(o,st,size,'rd');ma=r.m;steps.push(...r.steps)}
+  const src=o.k==='reg'?getReg(st,o.n):rdMem(st,ma.pa,size);
+  const AX=st.regs.AX,DX=st.regs.DX;
+  let wr=[],fl={},aff=[],undef=FLN.slice(),eqHTML='',err=null;
+  if(!div){
+    const a=size===8?(AX&255):AX;
+    const A=signed?sg(a,size):a,S=signed?sg(src,size):src,p=A*S;
+    let lo,hi;
+    if(size===8){lo=p&0xFFFF;wr=[['AX',lo]];hi=signed?(p<-128||p>127):(p>255)}
+    else{const u=p>>>0;lo=u&0xFFFF;const h=Math.floor(p/65536)&0xFFFF;wr=[['AX',lo],['DX',h]];hi=signed?(p<-32768||p>32767):(p>65535)}
+    fl={CF:hi,OF:hi};aff=['CF','OF'];undef=['PF','AF','ZF','SF'];
+    eqHTML=`${signed?`${A} × ${S}`:`${a} × ${src}`} = <b>${p}</b>${size===8?` = ${H(lo)}`:` = ${H((p>>>0),8)}`}`;
+    steps.push({html:`<div class="l">${N('نقرأ المعاملين:','Read the operands:')}</div><div class="l f">${size===8?'AL':'AX'} = ${H(a,size/4)} ,  ${descOp(o)} = ${H(src,size/4)}</div>`,hi:[size===8?'AL':'AX',...hiOf(o)],mem:ma?{pa:ma.pa,size,rw:'rd'}:undefined});
+    steps.push({html:`<div class="l">${N('نُجري الضرب:','Multiply:')}</div><div class="l f">${eqHTML}</div><div class="l mini">${N(hi?'الناتج يحتاج إلى الجزء الأعلى (AH أو DX) فيصبح CF=OF=1.':'الناتج يتسع في النصف الأدنى، فيبقى CF=OF=0.',hi?'The result needs the upper half (AH or DX), so CF=OF=1.':'The result fits in the lower half, so CF=OF=0.')}</div>`,hi:[]});
+    steps.push({html:`<div class="l">${N('نخزّن الناتج:','Store the result:')}</div><div class="l f">${size===8?`AX ← ${H(lo)}`:`DX:AX ← ${H(wr[1][1])}:${H(lo)}`}</div>`,hi:size===8?['AX']:['AX','DX']});
+    steps.push(flagStep(st,fl,aff,undef));
+  }else{
+    const dvd=size===8?AX:(((DX<<16)|AX)>>>0);
+    const D=signed?sg(dvd,size===8?16:32):dvd,S=signed?sg(src,size):src;
+    steps.push({html:`<div class="l">${N('نقرأ المقسوم والمقسوم عليه:','Read the dividend and the divisor:')}</div><div class="l f">${size===8?'AX':'DX:AX'} = ${H(dvd,size===8?4:8)} (${D}) ,  ${descOp(o)} = ${H(src,size/4)} (${S})</div>`,hi:size===8?['AX',...hiOf(o)]:['AX','DX',...hiOf(o)],mem:ma?{pa:ma.pa,size,rw:'rd'}:undefined});
+    if(S===0)err=N('خطأ قسمة (Divide Error): القاسم يساوي صفراً.','Divide Error: the divisor is zero.');
+    else{
+      const q=Math.trunc(D/S),rem=D-q*S;
+      const lim=signed?(size===8?[-128,127]:[-32768,32767]):[0,mask];
+      if(q<lim[0]||q>lim[1])err=N('خطأ قسمة (Divide Error): الخارج لا يتسع في السجل الهدف.','Divide Error: the quotient does not fit in the destination register.');
+      else{
+        steps.push({html:`<div class="l">${N('نُجري القسمة:','Divide:')}</div><div class="l f">${D} ÷ ${S} → ${N('الخارج','quotient')} = <b>${q}</b> ,  ${N('الباقي','remainder')} = <b>${rem}</b></div><div class="l mini">${signed?N('القسمة بإشارة: يُقرَّب الخارج نحو الصفر، ويأخذ الباقي إشارة المقسوم.','Signed division: the quotient is truncated toward zero and the remainder takes the sign of the dividend.'):''}</div>`,hi:[]});
+        const qv=q&mask,rv=rem&mask;
+        wr=size===8?[['AL',qv],['AH',rv]]:[['AX',qv],['DX',rv]];
+        steps.push({html:`<div class="l">${N('نخزّن النتيجة:','Store the result:')}</div><div class="l f">${size===8?`AL ← ${H(qv,2)} ,  AH ← ${H(rv,2)}`:`AX ← ${H(qv)} ,  DX ← ${H(rv)}`}</div>`,hi:wr.map(x=>x[0])});
+        steps.push({html:`<div class="l">${N('الأعلام بعد القسمة غير معرَّفة (undefined) في الـ 8086.','All flags are undefined after a division on the 8086.')}</div>`,hi:[]});
+      }
+    }
+    if(err)throw new Err(err,N('تذكير: تُطلَق المقاطعة 0 (Divide Error) عند القسمة على صفر أو عند فيض الخارج.','Reminder: interrupt 0 (Divide Error) is raised on division by zero or quotient overflow.'));
+  }
+  return {steps,commit:()=>{wr.forEach(([n,v])=>setReg(st,n,v));applyFl(st,fl,aff)}};
+}
+function shiftOnce(mn,v,cf,n){
+  const mask=n===8?0xFF:0xFFFF,msb=n===8?0x80:0x8000;
+  switch(mn){
+    case'SHL':case'SAL':return {v:(v<<1)&mask,cf:(v&msb)!==0};
+    case'SHR':return {v:v>>1,cf:(v&1)!==0};
+    case'SAR':return {v:(v>>1)|(v&msb),cf:(v&1)!==0};
+    case'ROL':{const t=(v&msb)!==0;return {v:((v<<1)|(t?1:0))&mask,cf:t}}
+    case'ROR':{const t=(v&1)!==0;return {v:(v>>1)|(t?msb:0),cf:t}}
+    case'RCL':{const t=(v&msb)!==0;return {v:((v<<1)|(cf?1:0))&mask,cf:t}}
+    default:{const t=(v&1)!==0;return {v:(v>>1)|(cf?msb:0),cf:t}}
+  }
+}
+function doShift(mn,d,cn,st,TX){
+  if(d.k==='imm')throw new Err(N('المعامل الأول يجب أن يكون سجلاً أو موضعاً في الذاكرة.','The first operand must be a register or a memory location.'));
+  noSeg(mn,d);
+  let count;
+  if(cn.k==='imm'){if(cn.val!==1)throw new Err(N('في الـ 8086 يجب أن يكون العدّاد (Count) إمّا 1 أو السجل CL.','On the 8086 the count must be either 1 or the CL register.'),N(`الحل: ضع العدد في CL ثم استخدم: ${mn} ${d.raw}, CL`,`Fix: put the count in CL and use: ${mn} ${d.raw}, CL`));count=1}
+  else if(cn.k==='reg'&&cn.n==='CL')count=getReg(st,'CL');
+  else throw new Err(N('العدّاد (Count) يجب أن يكون 1 أو CL.','The count must be 1 or CL.'));
+  const size=d.k==='reg'?d.size:(d.ptr?(d.ptr==='BYTE'?8:16):null);
+  if(!size)throw new Err(N('حجم المعامل غير واضح؛ استخدم BYTE PTR أو WORD PTR.','The operand size is ambiguous; use BYTE PTR or WORD PTR.'));
+  const w=size/4,msb=size===8?0x80:0x8000;
+  const P={SHL:['إزاحة منطقية لليسار: يخرج أعلى بت إلى CF ويدخل 0 من اليمين. كل إزاحة تضرب القيمة في 2.','Logical shift left: the top bit goes to CF and a 0 enters from the right. Each shift multiplies by 2.'],
+    SAL:['إزاحة حسابية لليسار (تطابق SHL): يخرج أعلى بت إلى CF ويدخل 0 من اليمين.','Arithmetic shift left (identical to SHL): the top bit goes to CF and a 0 enters from the right.'],
+    SHR:['إزاحة منطقية لليمين: يخرج أدنى بت إلى CF ويدخل 0 من اليسار. كل إزاحة تقسم القيمة (بلا إشارة) على 2.','Logical shift right: the lowest bit goes to CF and a 0 enters from the left. Each shift divides the unsigned value by 2.'],
+    SAR:['إزاحة حسابية لليمين: يخرج أدنى بت إلى CF ويبقى بت الإشارة (يُنسخ). كل إزاحة تقسم القيمة (بإشارة) على 2.','Arithmetic shift right: the lowest bit goes to CF and the sign bit is preserved (copied). Each shift divides the signed value by 2.'],
+    RCL:['تدوير لليسار عبر علم الحمل: CF جزء من الحلقة (9 أو 17 بتاً).','Rotate left through carry: CF is part of the ring (9 or 17 bits).'],
+    RCR:['تدوير لليمين عبر علم الحمل: CF جزء من الحلقة (9 أو 17 بتاً).','Rotate right through carry: CF is part of the ring (9 or 17 bits).'],
+    ROL:['تدوير لليسار: أعلى بت يدخل من اليمين وينسخ نفسه إلى CF.','Rotate left: the top bit re-enters from the right and is also copied to CF.'],
+    ROR:['تدوير لليمين: أدنى بت يدخل من اليسار وينسخ نفسه إلى CF.','Rotate right: the lowest bit re-enters from the left and is also copied to CF.']}[mn];
+  const steps=[{html:`<div class="l">${N('التعليمة','Instruction')} ${c(esc(TX))}: ${N(P[0],P[1])}</div><div class="l">${N('عدد الإزاحات','Count')} = <b>${count}</b> ${cn.k==='reg'?`(CL)`:''} ، ${N('الحجم','size')} = <b>${sz(size)}</b></div>`,hi:cn.k==='reg'?['CL']:[]}];
+  let ma=null;
+  if(d.k==='mem'){const r=memSteps(d,st,size,'wr');ma=r.m;steps.push(...r.steps)}
+  const v0=d.k==='reg'?getReg(st,d.n):rdMem(st,ma.pa,size);
+  let v=v0,cf=!!st.fl.CF,cf0=cf;
+  steps.push({html:`<div class="l">${N('القيمة الابتدائية:','Initial value:')}</div>${brow(descOp(d),v0,size,cf)}`,hi:hiOf(d),mem:ma?{pa:ma.pa,size,rw:'rd'}:undefined});
+  if(count===0)steps.push({html:`<div class="l">${N('العدّاد = 0 فلا يتغيّر شيء.','The count is 0, so nothing changes.')}</div>`,hi:[]});
+  let prevTop=null,first=null;
+  const shown=Math.min(count,8);
+  for(let i=1;i<=count;i++){
+    const before=v,cb=cf,r=shiftOnce(mn,v,cf,size);v=r.v;cf=r.cf;
+    if(i===1)first={before,res:v,cfa:cf};
+    if(i<=shown){
+      const left=['SHL','SAL','ROL','RCL'].includes(mn),outb=left?((before&msb)?1:0):((before&1)?1:0);
+      let inb;
+      if(mn==='SAR')inb=(before&msb)?1:0;else if(mn==='ROL'||mn==='ROR')inb=outb;else if(mn==='RCL'||mn==='RCR')inb=cb?1:0;else inb=0;
+      const why={SHL:N('صفر دائماً','always 0'),SAL:N('صفر دائماً','always 0'),SHR:N('صفر دائماً','always 0'),SAR:N('نسخة من بت الإشارة (يبقى كما هو)','a copy of the sign bit (it is preserved)'),ROL:N('هو نفسه البت الخارج (تدوير)','the same bit that left (rotation)'),ROR:N('هو نفسه البت الخارج (تدوير)','the same bit that left (rotation)'),RCL:N('قيمة CF قبل الإزاحة','the value CF had before the shift'),RCR:N('قيمة CF قبل الإزاحة','the value CF had before the shift')}[mn];
+      steps.push({html:`<div class="l"><b>${N('الإزاحة','Shift')} ${i}/${count}</b></div><div class="l">${N('البت الخارج:','Bit out:')} ${c(outb)} (${left?N('أعلى بت','top bit'):N('أدنى بت','lowest bit')}) ${N('يذهب إلى','goes to')} ${c('CF')}</div><div class="l">${N('البت الداخل:','Bit in:')} ${c(inb)} ${left?N('يدخل من اليمين','enters from the right'):N('يدخل من اليسار','enters from the left')} – ${why}</div>${brow(N('قبل','Before'),before,size,cb)}${brow(N('بعد','After'),v,size,cf)}`,hi:[]});
+    }
+  }
+  if(count>shown)steps.push({html:`<div class="l mini">${N(`… تُكمل الإزاحات حتى العدد ${count}. القيمة النهائية:`,`… the remaining shifts continue up to ${count}. Final value:`)}</div>${brow(N('النتيجة','Result'),v,size,cf)}`,hi:[]});
+  const rot=['ROL','ROR','RCL','RCR'].includes(mn);
+  let fl={},aff=[],undef=[];
+  if(count>0){
+    fl.CF=cf;aff=['CF'];
+    if(count===1){
+      const top=(v&msb)!==0,sec=(v&(msb>>1))!==0;
+      if(['SHL','SAL','ROL','RCL'].includes(mn))fl.OF=top!==cf;
+      else if(mn==='SHR')fl.OF=(v0&msb)!==0;
+      else if(mn==='SAR')fl.OF=false;
+      else fl.OF=top!==sec;
+      aff.push('OF');
+    }else undef.push('OF');
+    if(!rot){fl.PF=par(v&255)%2===0;fl.ZF=v===0;fl.SF=(v&msb)!==0;aff.push('PF','ZF','SF');undef.push('AF')}
+  }
+  steps.push({html:`<div class="l">${N('نخزّن الناتج النهائي:','Store the final result:')}</div><div class="l f">${descOp(d)} ← ${H(v,w)}</div>`,hi:hiOf(d),mem:ma?{pa:ma.pa,size,rw:'wr'}:undefined});
+  if(count>0){
+    steps.push(flagStep(st,fl,aff,undef));
+    const extra=rot?N('تؤثّر التعليمات الدوّارة في CF (و OF عند العدّاد 1) فقط؛ ولا تغيّر PF و SF و ZF.','Rotate instructions affect only CF (and OF when the count is 1); PF, SF and ZF are unchanged.'):N('تؤثّر الإزاحات أيضاً في PF و SF و ZF بحسب الناتج.','Shifts also update PF, SF and ZF from the result.');
+    steps[steps.length-1].html+=`<div class="l mini">${extra}</div>`;
+  }
+  return {steps,commit:()=>{if(d.k==='reg')setReg(st,d.n,v);else wrMem(st,ma.pa,v,size);applyFl(st,fl,aff)}};
+}
+function doFlagOp(mn,st,TX){
+  const nv=mn==='STC'?true:mn==='CLC'?false:!st.fl.CF;
+  const txt={STC:[`ضبط علم الحمل (${c('CF ← 1')})`,`Set the carry flag (${c('CF ← 1')})`],CLC:[`تصفير علم الحمل (${c('CF ← 0')})`,`Clear the carry flag (${c('CF ← 0')})`],CMC:[`عكس علم الحمل (${c('CF ← NOT CF')})`,`Complement the carry flag (${c('CF ← NOT CF')})`]}[mn];
+  return {steps:[{html:`<div class="l">${N('التعليمة','Instruction')} ${c(mn)}: ${N(txt[0],txt[1])}</div><div class="l f">CF: ${st.fl.CF?1:0} → <b>${nv?1:0}</b></div>`,hi:[]}],commit:()=>{st.fl.CF=nv}};
+}
+
+function doXCHG(a,b,st,T){
+  if(a.k==='imm'||b.k==='imm')throw new Err('XCHG ما تشتغل مع رقم مباشر، لازم رجستر أو ذاكرة.');
+  if(a.k==='mem'&&b.k==='mem')throw new Err('XCHG ما تشتغل بين ذاكرتين. لازم واحد منهم رجستر على الأقل.');
+  if((a.seg||b.seg))throw new Err('XCHG ما تشتغل مع Segment Registers.');
+  const size=opSize(a,b,'XCHG');
+  const mo=a.k==='mem'?a:(b.k==='mem'?b:null);
+  const steps=[{html:`<div class="l">التعليمة ${c(esc(T))} تبدّل محتوى المعاملين.</div><div class="l">الحجم = <b>${sz(size)}</b></div>`,hi:[]}];
+  let ma=null;if(mo){const r=memSteps(mo,st,size,'rd');ma=r.m;steps.push(...r.steps)}
+  const rd=o=>o.k==='reg'?getReg(st,o.n):rdMem(st,ma.pa,size);
+  const va=rd(a),vb=rd(b);
+  steps.push({html:`<div class="l">نقرا القيمتين:</div><div class="l f">${descOp(a)} = ${vx(va,size)} , ${descOp(b)} = ${vx(vb,size)}</div>`,hi:[a,b].filter(o=>o.k==='reg').map(o=>o.n),mem:ma?{pa:ma.pa,size,rw:'rd'}:undefined});
+  steps.push({html:`<div class="l">نبدّل القيمتين:</div><div class="l f">${descOp(a)} ← ${vx(vb,size)} , ${descOp(b)} ← ${vx(va,size)}</div>`,hi:[a,b].filter(o=>o.k==='reg').map(o=>o.n),mem:ma?{pa:ma.pa,size,rw:'wr'}:undefined});
+  const wr=(o,v)=>o.k==='reg'?setReg(st,o.n,v):wrMem(st,ma.pa,v,size);
+  return {steps,commit:()=>{wr(a,vb);wr(b,va)}};
+}
+function doPUSH(o,st,T){
+  if(o.k==='imm')throw new Err('الـ 8086 ما يدعم PUSH لرقم مباشر. حط الرقم برجستر أول ثم PUSH للرجستر.');
+  if(o.k==='reg'&&o.size===8)throw new Err('PUSH تتعامل مع 16-bit بس (Word). استخدم رجستر 16-bit مثل AX مو AL.');
+  const steps=[{html:`<div class="l">التعليمة ${c(esc(T))} تحفظ قيمة 16-bit بقمة الستاك (TOS).</div><div class="l mini">الستاك ينمو للأسفل: كل PUSH ينقص الـ SP بـ 2.</div>`,hi:[]}];
+  let ma=null;if(o.k==='mem'){const r=memSteps(o,st,16,'rd');ma=r.m;steps.push(...r.steps)}
+  const v=o.k==='reg'?getReg(st,o.n):rdMem(st,ma.pa,16);
+  const sp=getReg(st,'SP'),nsp=(sp-2)&0xFFFF,ss=getReg(st,'SS'),pa=(ss*16+nsp)&0xFFFFF;
+  steps.push({html:`<div class="l"><b>الخطوة 1:</b> ننقص SP بـ 2</div><div class="l f">(SP) ← (SP) − 2 = ${H(sp)} − 2 = <b>${H(nsp)}</b></div>`,hi:['SP']});
+  steps.push({html:`<div class="l"><b>الخطوة 2:</b> نحسب عنوان قمة الستاك</div><div class="l f">P.A of TOS = (SS) × 10H + SP = ${H(ss)} × 10H + ${H(nsp)} = <b>${H(pa,5)}</b></div>`,hi:['SS','SP'],mem:{pa,size:16,rw:'wr'}});
+  steps.push({html:`<div class="l"><b>الخطوة 3:</b> نكتب القيمة بقمة الستاك</div><div class="l f">(TOS) ← ${o.k==='reg'?o.n:descOp(o)} = <b>${H(v)}</b></div><div class="l mini">الواطي ${c(H(v&255,2))} ينكتب بالعنوان ${c(H(pa,5))} والعالي ${c(H(v>>8,2))} بالعنوان ${c(H(pa+1,5))}</div>`,hi:o.k==='reg'?[o.n]:[],mem:{pa,size:16,rw:'wr'}});
+  return {steps,commit:()=>{setReg(st,'SP',nsp);wrMem(st,pa,v,16)}};
+}
+function doPOP(o,st,T){
+  if(o.k==='imm')throw new Err('POP لازم تروح لرجستر أو ذاكرة، مو رقم.');
+  if(o.k==='reg'&&o.size===8)throw new Err('POP تتعامل مع 16-bit بس (Word). استخدم رجستر 16-bit.');
+  if(o.k==='reg'&&o.n==='CS')throw new Err('ما نگدر نسوي POP CS.');
+  const steps=[{html:`<div class="l">التعليمة ${c(esc(T))} تسحب قيمة 16-bit من قمة الستاك (TOS).</div><div class="l mini">بعد القراءة الـ SP يزيد بـ 2. القيمة تبقى بالذاكرة بس ما نعتبرها بالستاك.</div>`,hi:[]}];
+  const sp=getReg(st,'SP'),nsp=(sp+2)&0xFFFF,ss=getReg(st,'SS'),pa=(ss*16+sp)&0xFFFFF;
+  const v=rdMem(st,pa,16);
+  steps.push({html:`<div class="l"><b>الخطوة 1:</b> نحسب عنوان قمة الستاك</div><div class="l f">P.A of TOS = (SS) × 10H + SP = ${H(ss)} × 10H + ${H(sp)} = <b>${H(pa,5)}</b></div>`,hi:['SS','SP'],mem:{pa,size:16,rw:'rd'}});
+  let ma=null;
+  if(o.k==='mem'){const r=memSteps(o,st,16,'wr');ma=r.m;steps.push(...r.steps)}
+  steps.push({html:`<div class="l"><b>الخطوة 2:</b> نقرا القيمة من قمة الستاك</div><div class="l f">${o.k==='reg'?`(${o.n})`:descOp(o)} ← (TOS) = <b>${H(v)}</b></div><div class="l mini">الواطي ${c(H(v&255,2))} من ${c(H(pa,5))} والعالي ${c(H(v>>8,2))} من ${c(H(pa+1,5))}</div>`,hi:o.k==='reg'?[o.n]:[],mem:{pa,size:16,rw:'rd'}});
+  steps.push({html:`<div class="l"><b>الخطوة 3:</b> نزيد SP بـ 2</div><div class="l f">(SP) ← (SP) + 2 = ${H(sp)} + 2 = <b>${H(nsp)}</b></div>`,hi:['SP'],mem:{pa,size:16,rw:'rd'}});
+  return {steps,commit:()=>{if(o.k==='reg')setReg(st,o.n,v);else wrMem(st,ma.pa,v,16);setReg(st,'SP',nsp)}};
+}
+function doLEA(d,s,st,T){
+  if(d.k!=='reg'||d.size!==16||d.seg)throw new Err('LEA الهدف لازم يكون رجستر 16-bit عام (مو Segment ومو 8-bit).');
+  if(s.k!=='mem')throw new Err('LEA المصدر لازم يكون عنوان ذاكرة داخل [ ]، مثل: <code dir="ltr">LEA SI, [BX+DI]</code>');
+  const m=memAccess(s,st);
+  const steps=[
+    {html:`<div class="l">التعليمة ${c(esc(T))} (Load Effective Address) تجيب <b>العنوان نفسه (EA)</b> مو المحتوى!</div>`,hi:[]},
+    {html:`<div class="l"><b>نحسب الـ EA فقط</b></div>${m.ext?`<div class="l">${m.ext}</div>`:''}<div class="l f">${m.eaL}</div><div class="l mini">ما نحتاج Segment ولا نروح للذاكرة أبداً.</div>`,hi:m.hi},
+    {html:`<div class="l">نحط الـ EA بالرجستر:</div><div class="l f">(${d.n}) ← EA = <b>${H(m.ea)}</b></div>`,hi:[d.n]}
+  ];
+  return {steps,commit:()=>setReg(st,d.n,m.ea)};
+}
+function doLDS(mn,d,s,st,T){
+  const sg=mn==='LDS'?'DS':'ES';
+  if(d.k!=='reg'||d.size!==16||d.seg)throw new Err(`${mn} الهدف لازم يكون رجستر 16-bit عام.`);
+  if(s.k!=='mem')throw new Err(`${mn} المصدر لازم يكون ذاكرة داخل [ ].`);
+  const steps=[{html:`<div class="l">التعليمة ${c(esc(T))} تقرا <b>Double Word</b> (4 بايت) من الذاكرة: أول Word يروح للرجستر <b>${d.n}</b> ، وثاني Word يروح لـ <b>${sg}</b></div>`,hi:[]}];
+  const r=memSteps(s,st,32,'rd');const pa=r.m.pa;steps.push(...r.steps);
+  const w1=rdMem(st,pa,16),w2=rdMem(st,pa+2,16);
+  steps.push({html:`<div class="l">أول Word يروح للرجستر ${d.n}:</div><div class="l f">[PA] → (${d.n}) = <b>${H(w1)}</b></div><div class="l mini">الواطي ${c(H(w1&255,2))} من ${c(H(pa,5))} والعالي ${c(H(w1>>8,2))} من ${c(H(pa+1,5))}</div>`,hi:[d.n],mem:{pa,size:16,rw:'rd'}});
+  steps.push({html:`<div class="l">ثاني Word يروح للـ ${sg}:</div><div class="l f">[PA+2] → (${sg}) = <b>${H(w2)}</b></div><div class="l mini">الواطي ${c(H(w2&255,2))} من ${c(H(pa+2,5))} والعالي ${c(H(w2>>8,2))} من ${c(H(pa+3,5))}</div>`,hi:[sg],mem:{pa:pa+2,size:16,rw:'rd'}});
+  return {steps,commit:()=>{setReg(st,d.n,w1);setReg(st,sg,w2)}};
+}
+function portOf(o,st,name){
+  if(o.k==='imm'){
+    if(o.val>0xFF)throw new Err('رقم الـ Port المباشر لازم يكون 8-bit (لحد FFH). للأرقام الأكبر حطها بـ DX.');
+    return {port:o.val,hi:[],txt:`رقم الـ Port مكتوب بالتعليمة = <b>${H(o.val,2)}</b>`};
+  }
+  if(o.k==='reg'&&o.n==='DX'){const p=getReg(st,'DX');return {port:p,hi:['DX'],txt:`رقم الـ Port ناخذه من DX = <b>${H(p)}</b>`}}
+  throw new Err(`رقم الـ Port لازم يكون رقم 8-bit أو DX (مثل ${name==='IN'?'IN AL, 18H أو IN AL, DX':'OUT 3BH, AL أو OUT DX, AL'}).`);
+}
+function doIN(d,s,st,T){
+  if(d.k!=='reg'||!['AL','AX'].includes(d.n))throw new Err('IN الهدف لازم يكون AL (8-bit) أو AX (16-bit) بس.');
+  const p=portOf(s,st,'IN'),size=d.size,v=st.inValue&(size===8?0xFF:0xFFFF);
+  const pw=H(p.port,p.port>0xFF?4:2);
+  const steps=[
+    {html:`<div class="l">التعليمة ${c(esc(T))} تقرا بيانات من Input Port وتحطها بـ ${d.n} (${sz(size)}).</div>`,hi:[]},
+    {html:`<div class="l"><b>1)</b> ${p.txt}</div>`,hi:p.hi,io:{dir:'in',stage:0,port:pw,val:null}},
+    {html:`<div class="l"><b>2)</b> وحدة الإدخال (Input Unit) ترسل <b>${c(vx(v,size))}</b> للـ Port ${c(pw)}</div>`,hi:[],io:{dir:'in',stage:1,port:pw,val:vx(v,size)}},
+    {html:`<div class="l"><b>3)</b> الـ CPU يقرا البورت ويخزن القيمة:</div><div class="l f">(${d.n}) ← <b>${vx(v,size)}</b></div>${size===16?`<div class="l mini">يعني AH = ${c(H(v>>8,2))} و AL = ${c(H(v&255,2))}</div>`:''}`,hi:[d.n],io:{dir:'in',stage:2,port:pw,val:vx(v,size)}}
+  ];
+  return {steps,commit:()=>{setReg(st,d.n,v);st.ports[p.port]=v}};
+}
+function doOUT(d,s,st,T){
+  if(s.k!=='reg'||!['AL','AX'].includes(s.n))throw new Err('OUT المصدر لازم يكون AL (8-bit) أو AX (16-bit) بس.');
+  const p=portOf(d,st,'OUT'),size=s.size,v=getReg(st,s.n);
+  const pw=H(p.port,p.port>0xFF?4:2);
+  const steps=[
+    {html:`<div class="l">التعليمة ${c(esc(T))} ترسل محتوى ${s.n} (${sz(size)}) إلى Output Port.</div>`,hi:[]},
+    {html:`<div class="l"><b>1)</b> ${p.txt}</div>`,hi:p.hi,io:{dir:'out',stage:0,port:pw,val:null}},
+    {html:`<div class="l"><b>2)</b> الـ CPU ينسخ محتوى ${s.n} إلى الـ Port ${c(pw)}:</div><div class="l f">(PORT ${pw}) ← (${s.n}) = <b>${vx(v,size)}</b></div>`,hi:[s.n],io:{dir:'out',stage:1,port:pw,val:vx(v,size)}},
+    {html:`<div class="l"><b>3)</b> الـ Port يمرر القيمة ${c(vx(v,size))} لوحدة الإخراج (Output Unit)</div>`,hi:[],io:{dir:'out',stage:2,port:pw,val:vx(v,size)}}
+  ];
+  return {steps,commit:()=>{st.ports[p.port]=v;st.outVal=v}};
+}
+
+/* =====================  مكوّن المحاكي  ===================== */
+function presetSuffix(p){
+  if(!p.set)return '';
+  const parts=Object.entries(p.set).map(([k,v])=>k==='IN'?`in=${hex(v,v>0xFF?4:2)}H`:FLN.includes(k)?`${k}=${v?1:0}`:`${k}=${hex(v,R16.includes(k)?4:2)}H`);
+  return '  ['+parts.join(', ')+']';
+}
+class Sim{
+  constructor(el,cfg){
+    this.el=el;this.cfg=cfg;this.text=cfg.default||'';this.sl=(d,f,e)=>cfg.bi?T(f,e):d;
+    el.innerHTML=`
+      <div class="ctl"><input class="ins" spellcheck="false" autocomplete="off" aria-label="التعليمة"><button class="btn" data-a="next"></button><button class="btn sec" data-a="all">${this.sl('⏩ نفّذ الكل','⏩ تنفيذ الكل','⏩ Run all')}</button><button class="btn sec" data-a="reset">${this.sl('↺ رجّع من الأول','↺ إعادة','↺ Reset')}</button></div>
+      <div class="chips"></div>
+      <div class="mini legend" style="margin:2px 0 6px"></div>
+      <div class="panels"></div>
+      <div class="out"></div>`;
+    el.querySelector('.legend').innerHTML=this.sl('🎨 الألوان: الأصفر = يُستخدم في الخطوة الحالية ، الأخضر (يومض) = تغيّرت قيمته ، بالذاكرة: الأخضر = قراءة والبرتقالي = كتابة. تگدر تعدّل قيم الرجسترات بنفسك.','🎨 الألوان: الأصفر = يُستخدم في الخطوة الحالية، والأخضر (يومض) = تغيّرت قيمته، وفي الذاكرة: الأخضر = قراءة والبرتقالي = كتابة. يمكنك تعديل قيم السجلات بنفسك.','🎨 Colors: yellow = used in the current step, green (flashing) = value changed, in memory: green = read, orange = write. You can edit register values yourself.');
+    this.inp=el.querySelector('input.ins');this.inp.value=this.text;
+    this.chips=el.querySelector('.chips');this.panels=el.querySelector('.panels');this.out=el.querySelector('.out');this.btn=el.querySelector('[data-a=next]');
+    (cfg.presets||[]).forEach((p,i)=>{const b=document.createElement('button');b.className='chip '+(p.kind||'');b.textContent=p.code+presetSuffix(p);b.title=p.tip||'';b.dataset.i=i;this.chips.appendChild(b)});
+    el.addEventListener('click',e=>{
+      const b=e.target.closest('button');if(!b||!el.contains(b))return;
+      if(b.dataset.a==='next')this.next();
+      else if(b.dataset.a==='all')this.all();
+      else if(b.dataset.a==='reset')this.reset();
+      else if(b.dataset.i!==undefined)this.preset(cfg.presets[+b.dataset.i]);
+    });
+    el.addEventListener('click',e=>{const f=e.target.closest('[data-f]');if(f&&el.contains(f)){this.st.fl[f.dataset.f]=!this.st.fl[f.dataset.f];this.cancel();this.render()}});
+    el.addEventListener('change',e=>{
+      const t=e.target;
+      if(t.dataset&&t.dataset.r){
+        const n=t.dataset.r,w=R16.includes(n)?4:2;
+        const v=parseInt(t.value.trim().replace(/h$/i,''),16);
+        if(!isNaN(v)){const mask=w===4?0xFFFF:0xFF;setReg(this.st,n,v&mask)}
+        this.cancel();this.render();
+      }else if(t.dataset&&t.dataset.inv!==undefined){
+        const v=parseInt(t.value.trim().replace(/h$/i,''),16);if(!isNaN(v))this.st.inValue=v&0xFFFF;this.cancel();this.render();
+      }
+    });
+    this.inp.addEventListener('input',()=>{this.text=this.inp.value;this.cancel();this.err=null;this.renderOut();this.setBtn()});
+    this.inp.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();this.next()}});
+    this.reset();
+  }
+  cancel(){this.trace=null;this.done=false;this.shown=0}
+  reset(){
+    this.st=newState(this.cfg);this.trace=null;this.done=false;this.shown=0;this.err=null;this.curMem=null;this.io=null;this.flash=null;
+    this.sp0=this.st.regs.SP;this.render();
+  }
+  preset(p){
+    if(p.fresh)this.reset();
+    if(p.set){for(const k in p.set){if(k==='IN')this.st.inValue=p.set[k];else if(FLN.includes(k))this.st.fl[k]=!!p.set[k];else setReg(this.st,k,p.set[k])}}
+    this.text=p.code;this.inp.value=p.code;this.err=null;this.cancel();
+    this.start(p);
+  }
+  start(p){
+    ENG=this.cfg.bi?(LANG==='en'?'en':'f'):'d';
+    const r=analyze(this.text,this.st);
+    this.note=p&&p.note||null;
+    if(r.error){this.err=r;this.trace=null;this.render();return}
+    this.err=null;this.trace=r;this.done=false;this.shown=1;this.applyStep();this.render();
+  }
+  applyStep(){
+    const s=this.trace.steps[this.shown-1];
+    if(s.mem)this.curMem=s.mem;
+    if(s.io)this.io=s.io;
+  }
+  next(){
+    if(!this.trace||this.done){this.start();return}
+    this.shown++;this.applyStep();
+    if(this.shown>=this.trace.steps.length)this.finish();
+    this.render();
+    const last=this.out.querySelector('.st.cur');if(last&&last.scrollIntoView)last.scrollIntoView({block:'nearest',behavior:'smooth'});
+  }
+  all(){
+    if(!this.trace||this.done){this.start();if(!this.trace)return}
+    while(this.shown<this.trace.steps.length){this.shown++;this.applyStep()}
+    this.finish();this.render();
+  }
+  finish(){
+    const b={...this.st.regs},bm=new Map(this.st.mem),bf={...this.st.fl};
+    this.trace.commit();this.done=true;
+    const fr=new Set(),fm=new Set();
+    for(const k of R16)if(b[k]!==this.st.regs[k]){fr.add(k);
+      if(['AX','BX','CX','DX'].includes(k)){if((b[k]>>8)!==(this.st.regs[k]>>8))fr.add(k[0]+'H');if((b[k]&255)!==(this.st.regs[k]&255))fr.add(k[0]+'L')}}
+    this.st.mem.forEach((v,a)=>{if(bm.get(a)!==v)fm.add(a)});
+    const ff=new Set();FLN.forEach(n=>{if(bf[n]!==this.st.fl[n])ff.add(n)});this.flash={fr,fm,fl:ff};
+  }
+  setBtn(){
+    const t=this.trace;
+    this.btn.textContent=(!t||this.done)?(this.done?this.sl('▶ نفّذ مرة ثانية','▶ نفّذ مرة أخرى','▶ Run again'):this.sl('▶ ابدأ التنفيذ','▶ ابدأ التنفيذ','▶ Start')):`${this.sl('⏭ الخطوة التالية','⏭ الخطوة التالية','⏭ Next step')} (${this.shown}/${t.steps.length})`;
+  }
+  curStep(){return this.trace&&this.shown?this.trace.steps[this.shown-1]:null}
+  regHTML(n,hl,fl){
+    const st=this.st;
+    if(['AX','BX','CX','DX'].includes(n)){
+      const H1=n[0]+'H',L1=n[0]+'L';
+      const cls=(hl.has(n)?' hl':'')+(fl&&fl.fr.has(n)?' fl':'');
+      const ih=(hl.has(H1)?' hl':'')+(fl&&fl.fr.has(H1)?' fl':''),il=(hl.has(L1)?' hl':'')+(fl&&fl.fr.has(L1)?' fl':'');
+      return `<div class="reg${cls}"><div class="rn">${n}</div><div class="cells"><input class="${ih}" data-r="${H1}" value="${hex(getReg(st,H1),2)}" maxlength="2" aria-label="${H1}"><input class="${il}" data-r="${L1}" value="${hex(getReg(st,L1),2)}" maxlength="2" aria-label="${L1}"></div><div class="hn"><span>${H1}</span><span>${L1}</span></div></div>`;
+    }
+    const cls=(hl.has(n)?' hl':'')+(fl&&fl.fr.has(n)?' fl':'');
+    return `<div class="reg w${cls}"><div class="rn">${n}</div><div class="cells"><input data-r="${n}" value="${hex(st.regs[n],4)}" maxlength="4" aria-label="${n}"></div></div>`;
+  }
+  render(){
+    const cfg=this.cfg,st=this.st,s=this.curStep();
+    const hl=new Set((s&&s.hi)||[]);
+    // اذا الرجستر 16-bit مظلل نظلل المربعات الداخلية
+    ['AX','BX','CX','DX'].forEach(n=>{if(hl.has(n)){hl.add(n[0]+'H');hl.add(n[0]+'L')}});
+    ['AL','AH','BL','BH','CL','CH','DL','DH'].forEach(n=>{if(hl.has(n))hl.add(n)});
+    const fl=this.flash;
+    let html='';
+    (cfg.regGroups||[]).forEach(g=>{html+=`<div class="panel"><div class="pt">${g.title}</div><div class="regs">${g.regs.map(n=>this.regHTML(n,hl,fl)).join('')}</div></div>`});
+    if(cfg.panels&&cfg.panels.includes('flags'))html+=this.flagsHTML(fl);
+    if(cfg.panels&&cfg.panels.includes('mem'))html+=this.memHTML(fl);
+    if(cfg.panels&&cfg.panels.includes('stack'))html+=this.stackHTML(fl);
+    if(cfg.panels&&cfg.panels.includes('io'))html+=this.ioHTML();
+    this.panels.innerHTML=html;
+    this.flash=null;
+    this.renderOut();this.setBtn();
+  }
+  flagsHTML(fl){
+    const st=this.st;
+    return `<div class="panel"><div class="pt">FLAGS</div><div class="flr">${FLN.map(n=>`<div class="fb ctl ${st.fl[n]?'on':''} ${fl&&fl.fl&&fl.fl.has(n)?'fl':''}" data-f="${n}" title="${this.sl('اضغط للتبديل','اضغط للتبديل','Click to toggle')}"><b>${n}</b><i>${st.fl[n]?1:0}</i></div>`).join('')}</div><div class="mini" style="margin-top:4px">${this.sl('اضغط على أي علم لتبديله قبل التنفيذ.','اضغط على أي علم لتبديله قبل التنفيذ.','Click a flag to toggle it before running.')}</div></div>`;
+  }
+  memHTML(fl){
+    const c0=this.cfg,st=this.st,cm=this.curMem;
+    let start;
+    const focus=cm?cm.pa:null;
+    if(c0.memBase!=null){start=c0.memBase;if(focus!=null&&(focus<start||focus+(cm.size/8)>start+12))start=focus-2}
+    else start=focus!=null?focus-2:(st.regs.DS*16);
+    start=Math.max(0,start)&0xFFFFF;
+    let cells='';
+    for(let i=0;i<12;i++){
+      const a=(start+i)&0xFFFFF;let cls='';
+      if(cm&&a>=cm.pa&&a<cm.pa+cm.size/8)cls=cm.rw==='wr'?' wr':' rd';
+      const has=st.mem.has(a)||st.pattern;
+      if(!has)cls+=' empty';
+      if(fl&&fl.fm.has(a))cls+=' fl';
+      cells+=`<div class="mcell${cls}"><div class="ma">${hex(a,5)}</div><div class="mv">${has?hex(rdB(st,a),2):'··'}</div></div>`;
+    }
+    return `<div class="panel" style="grid-column:1/-1"><div class="pt">MEMORY  (Address ← Content) ${cm?` — <span style="color:${cm.rw==='wr'?'var(--wr)':'var(--ok)'}">${cm.rw==='wr'?'Write':'Read'}</span>`:''}</div><div class="mem">${cells}</div></div>`;
+  }
+  stackHTML(fl){
+    const st=this.st,ss=st.regs.SS,sp=st.regs.SP,cm=this.curMem;
+    const top=Math.max(this.sp0,sp);
+    let rows='';
+    for(let i=0;i<=9;i++){
+      const off=(top-i)&0xFFFF,a=(ss*16+off)&0xFFFFF;
+      const tos=off===sp;
+      let cls='';if(cm&&a>=cm.pa&&a<cm.pa+cm.size/8)cls=cm.rw==='wr'?' wr':' rd';
+      if(fl&&fl.fm.has(a))cls+=' fl';
+      const has=st.mem.has(a);
+      rows+=`<div class="srow${tos?' tos':''}"><span class="sa">${hex(a,5)}</span><span class="sv${cls}">${has?hex(rdB(st,a),2):'··'}</span><span class="sa">${hex(ss)}H:${hex(off)}H</span><span class="mk">${tos?'◀ TOS (SP)':''}</span></div>`;
+    }
+    return `<div class="panel"><div class="pt">STACK  (ينمو للأسفل ↓)</div><div class="stk">${rows}</div></div>`;
+  }
+  ioHTML(){
+    const io=this.io||{dir:this.cfg.ioDir||'in',stage:-1,port:'--',val:null};
+    const IN=io.dir==='in',s=io.stage;
+    const a1=IN?(s===2):(s===1),a2=IN?(s===1):(s===2);
+    const pv=(IN?(s>=1):(s>=1))?io.val:'';
+    const dv=IN?(s>=1?io.val:''):(s>=2?io.val:'');
+    const dvIn=IN?`<input data-inv style="width:5em;text-align:center;font:inherit;font-weight:800;border:2px solid var(--line);border-radius:8px;direction:ltr" value="${hex(this.st.inValue,this.st.inValue>0xFF?4:2)}" aria-label="قيمة وحدة الإدخال">`:'';
+    return `<div class="panel" style="grid-column:1/-1"><div class="pt">I/O</div><div class="io">
+      <div class="bx cpu"><b>CPU</b><div class="v">${s>=2&&IN?io.val:(!IN&&s>=1?io.val:'')}</div></div>
+      <div class="ar ${(IN?a1:a1)?'on':''}">${IN?'◀':'▶'}</div>
+      <div class="bx pt"><b>${IN?'Input':'Output'} Port No.</b><div class="v" style="font-size:1.1rem">${io.port}</div><div class="v">${pv||''}</div></div>
+      <div class="ar ${a2?'on':''}">${IN?'◀':'▶'}</div>
+      <div class="bx"><b>${IN?'Input':'Output'} Unit</b><div class="v">${IN?'':dv}</div>${dvIn}${IN?'<div class="mini">اكتب القيمة اللي ترسلها الوحدة</div>':''}</div></div>
+      <div class="mini" style="text-align:center;margin-top:6px">${IN?'IN: البيانات تمشي من الوحدة إلى الـ Port ثم إلى الـ CPU':'OUT: البيانات تمشي من الـ CPU إلى الـ Port ثم إلى الوحدة'}</div></div>`;
+  }
+  renderOut(){
+    let h='';
+    if(this.err){
+      h+=`<div class="err"><b class="h">${this.sl('❌ هذي التعليمة غلط!','❌ التعليمة غير صحيحة','❌ This instruction is not valid')}</b><div>${this.err.error}</div>${this.err.fix?`<div class="fix">✅ ${this.err.fix}</div>`:''}</div>`;
+    }
+    if(this.trace){
+      h+='<div class="trace">';
+      for(let i=0;i<this.shown;i++){
+        h+=`<div class="st${i===this.shown-1?' cur':''}"><div class="n">${i+1}</div><div class="tx">${this.trace.steps[i].html}</div></div>`;
+      }
+      if(this.done)h+=`<div class="done">${this.sl('✔ خلصت التعليمة – شوف الرجسترات/الذاكرة اللي تغيرت (لونها أخضر لحظة).','✔ اكتملت التعليمة. لاحظ السجلات والأعلام والذاكرة التي تغيّرت (تظهر باللون الأخضر لحظة).','✔ Instruction complete. Watch the registers, flags and memory that changed (they flash green).')}</div>`;
+      h+='</div>';
+    }else if(!this.err&&this.cfg.hint){h+=`<div class="mini" style="margin-top:12px">${this.cfg.hint}</div>`}
+    if(this.note)h+=`<div class="card soft" style="margin-top:10px">${this.note}</div>`;
+    this.out.innerHTML=h;
+  }
+}
+
+/* =====================  الأقسام  ===================== */
+const GEN=['AX','BX','CX','DX'];
+const grp=(title,regs)=>({title,regs});
+
+function simBlock(el,cfg){const d=document.createElement('div');el.appendChild(d);return new Sim(d,cfg)}
+function head(el,title,lead){el.insertAdjacentHTML('beforeend',`<h2>${title}</h2><p class="lead">${lead}</p>`)}
+
+function secHome(el){
+  head(el,'8086 Microprocessor – شرح تفاعلي','محاضرة 3 (Addressing Modes) + محاضرة 4 (Instruction Set – Part 1). كل شي هنا تضغط عليه وتشوف شنو يصير خطوة خطوة.');
+  el.insertAdjacentHTML('beforeend',`
+  <div class="card soft"><b>كيف تستخدم الملف بالمحاضرة؟</b>
+    <ul><li>اختار قسم من القائمة اليمين.</li><li>اضغط على أي تعليمة جاهزة (الأزرار الملونة) أو اكتب تعليمة من عندك.</li><li>اضغط <b>«الخطوة التالية»</b> وخلي الطلاب يتوقعون شنو الخطوة الجاية قبل ما تضغط.</li><li>گدرون تغيرون قيم الرجسترات (مربعات الأرقام) وتشوفون النتيجة تتغير.</li></ul></div>
+  <details class="card"><summary style="cursor:pointer;font-weight:700">📖 قاموس المصطلحات (اضغط للفتح)</summary>
+   <table class="t" style="margin-top:8px"><tr><th>المصطلح</th><th>المعنى</th></tr>
+   <tr><td><b class="mono">EA</b></td><td>Effective Address: العنوان داخل المقطع (16-bit) الذي تحسبه التعليمة.</td></tr>
+   <tr><td><b class="mono">BA</b></td><td>Base Address: بداية المقطع = <span class="fs">Segment × 10H</span>.</td></tr>
+   <tr><td><b class="mono">PA</b></td><td>Physical Address: العنوان الحقيقي (20-bit) = <span class="fs">BA + EA</span>، وهو الذي يخرج على الـ Address Bus.</td></tr>
+   <tr><td><b class="mono">DS / ES / SS / CS</b></td><td>سجلات المقاطع: Data و Extra و Stack و Code.</td></tr>
+   <tr><td><b class="mono">SP / TOS</b></td><td>مؤشر المكدّس (Stack Pointer) وقمة المكدّس (Top Of Stack).</td></tr>
+   <tr><td><b class="mono">IP</b></td><td>Instruction Pointer: عنوان التعليمة التالية داخل مقطع الكود CS.</td></tr>
+   <tr><td><b class="mono">Immediate</b></td><td>رقم مكتوب داخل التعليمة نفسها.</td></tr>
+   <tr><td><b class="mono">Little Endian</b></td><td>البايت الأدنى (Low) يُخزَّن في العنوان الأصغر.</td></tr>
+   <tr><td><b class="mono">Sign Extension</b></td><td>تمديد الرقم السالب من 8 إلى 16 بتاً بنسخ بت الإشارة (<span class="fs">A2H → FFA2H</span>).</td></tr>
+   <tr><td><b class="mono">CF ZF SF OF PF AF</b></td><td>أعلام الحالة: Carry و Zero و Sign و Overflow و Parity و Aux Carry.</td></tr></table></details>
+  <h3>محاضرة 3 – Addressing Modes</h3>
+  <div class="card"><p>كل تعليمة (Instruction) فيها <b>Operation</b> (شنو نسوي) و <b>Operand(s)</b> (على شنو نسوي). <b>أنماط العنونة</b> هي الطرق المختلفة اللي نحدد بيها الـ Operand.</p>
+   <div class="grid2"><div><span class="tag">Group I</span> داتا برجستر أو Immediate<ol><li>Register</li><li>Immediate</li></ol></div>
+   <div><span class="tag o">Group II</span> داتا بالذاكرة<ol start="3"><li>Direct</li><li>Register Indirect</li><li>Based</li><li>Indexed</li><li>Based Indexed</li></ol></div></div></div>
+  <h3>محاضرة 4 – Instruction Set</h3>
+  <div class="card"><p>قسم إضافي: <b>Instruction Pointer</b> و <b>Flags</b> (بدون سلايدات، شرح مبسط).</p></div><div class="card"><p>الـ 8086 يدعم <b>6 أنواع</b> من التعليمات: Data Transfer، Arithmetic، Logical، String manipulation، Process Control، Control Transfer. بهذا الملف ندرس <b>Data Transfer</b>: <span class="c">MOV</span> <span class="c">XCHG</span> <span class="c">PUSH</span> <span class="c">POP</span> <span class="c">LEA</span> <span class="c">LDS</span> <span class="c">LES</span> <span class="c">IN</span> <span class="c">OUT</span></p></div>
+  <div class="hero" id="hero"></div>`);
+  const hero=el.querySelector('#hero');
+  SECTIONS.filter(s=>s.id!=='home').forEach(s=>{
+    const d=document.createElement('div');d.className='card go';d.innerHTML=`<b>${s.icon} ${s.title}</b><div class="mini">${s.desc||''}</div>`;d.onclick=()=>show(s.id);hero.appendChild(d)});
+}
+
+function secPA(el){
+  head(el,'حساب الـ Physical Address','الـ 8086 عنده 20 خط عنوان (Address Lines)، فيگدر يوصل لـ 2²⁰ = 1MB ذاكرة. بس أكبر رجستر بيه 16-bit بس! فلازم نحسب العنوان الفعلي من (Segment : Offset).');
+  el.insertAdjacentHTML('beforeend',`<div class="card">
+    <div class="ctl"><span>Segment:</span><input class="fld" id="pSeg" value="89AB" maxlength="4"><span>Offset:</span><input class="fld" id="pOff" value="F012" maxlength="4"><button class="btn" id="pNext"></button><button class="btn sec" id="pAll">⏩ الكل</button><button class="btn sec" id="pRst">↺</button></div>
+    <div class="chips"><button class="chip" data-s="89AB" data-o="F012">89AB : F012</button><button class="chip" data-s="3060" data-o="0500">3060 : 0500</button><button class="chip" data-s="9000" data-o="6037">9000 : 6037</button><button class="chip" data-s="FFFF" data-o="0010">FFFF : 0010 (يلف!)</button></div>
+    <div id="pView"></div><div id="pTxt" class="trace"></div></div>
+    <div class="card soft" id="pExtra"></div>`);
+  let step=0;const $=id=>el.querySelector('#'+id);
+  const texts=[
+    'الـ Segment Register عبارة عن 16-bit = <b>4 خانات Hex</b>.',
+    'ننزاح خانة Hex واحدة <b>لليسار</b> (نفس الضرب بـ 10H أو نضيف 0000 بالـ bits)، أي نضيف <b>0</b> من اليمين فيصير 20-bit.',
+    'الـ Offset هو 16-bit، فنكمله لـ 20-bit بإضافة <b>0</b> من اليسار.',
+    'نجمع الاثنين بالـ <b>Adder</b>، والنتيجة هي الـ Physical Address (20-bit) اللي يطلع على الـ Address Bus.'
+  ];
+  function parse(){const s=parseInt($('pSeg').value,16),o=parseInt($('pOff').value,16);return [isNaN(s)?0:s&0xFFFF,isNaN(o)?0:o&0xFFFF]}
+  function draw(){
+    const [s,o]=parse();const sh=hex(s,4)+'0',of='0'+hex(o,4),pa=(s*16+o)&0xFFFFF,pr=hex(pa,5);
+    const row=(lb,ds,fn)=>`<div class="pa-row"><span class="lb">${lb}</span>${ds.split('').map((d,i)=>fn(d,i)).join('')}</div>`;
+    let h=row('Segment (16-bit)',sh,(d,i)=>`<div class="dg ${i===4?(step>=1?'z':'e'):''}">${i===4&&step<1?'':d}</div>`);
+    h+=row('Offset (16-bit)',of,(d,i)=>`<div class="dg ${i===0?(step>=2?'z':'e'):''}">${i===0&&step<2?'':d}</div>`);
+    h+=row('Physical Address',pr,(d)=>`<div class="dg ${step>=3?'r':'e'}">${step>=3?d:''}</div>`);
+    $('pView').innerHTML=h;
+    $('pTxt').innerHTML=texts.slice(0,step+1).map((t,i)=>`<div class="st ${i===step?'cur':''}"><div class="n">${i+1}</div><div class="tx">${t}</div></div>`).join('')+
+      (step>=3?`<div class="done"><span class="fs">PA = ${hex(s,4)}0 + ${hex(o,5)} = ${pr}H</span> ${(s*16+o)>0xFFFFF?' — تجاوز 20-bit، العنوان يلف (wrap-around) لأن عدنا 20 خط بس':''}</div>`:'');
+    $('pNext').textContent=step>=3?'▶ من الأول':`⏭ الخطوة التالية (${step+1}/4)`;
+    let ex='<b>معلومة:</b> نفس الـ Physical Address ممكن يجي من أكثر من (Segment:Offset)! مثلاً ';
+    if(s<0xFFFF&&o>=16){ex+=`${c(hex(s,4)+':'+hex(o,4))} و ${c(hex(s+1,4)+':'+hex(o-16,4))} الاثنين يعطون <b>${pr}H</b>.`}
+    else ex+='جرب Segment+1 مع Offset−10H وراح تشوف نفس العنوان. (الـ Segments تتداخل كل 16 بايت = 1 paragraph).';
+    $('pExtra').innerHTML=ex;
+  }
+  $('pNext').onclick=()=>{step=step>=3?0:step+1;draw()};
+  $('pAll').onclick=()=>{step=3;draw()};$('pRst').onclick=()=>{step=0;draw()};
+  ['pSeg','pOff'].forEach(i=>$(i).addEventListener('input',()=>{step=0;draw()}));
+  el.querySelectorAll('.chip').forEach(b=>b.onclick=()=>{$('pSeg').value=b.dataset.s;$('pOff').value=b.dataset.o;step=0;draw()});
+  draw();
+}
+
+const MODE_REGS={DS:0x3060,ES:0x4080,SS:0x9000,BX:0x0490,SI:0x0670,DI:0x02F5,BP:0x5D42,SP:0x2000,DX:0x7A3C};
+const MODES=[
+ {n:'Register',g:1,exp:'التعليمة تذكر <b>اسم الرجستر</b> اللي بيه الداتا. ما نحتاج ذاكرة.',f:'(CL) ← (DH)',mem:false,pre:[['MOV CL, DH'],['MOV AX, BX'],['MOV BH, AL']]},
+ {n:'Immediate',g:1,exp:'الداتا (8 أو 16 بت) هي <b>جزء من التعليمة نفسها</b>.',f:'(DL) ← 08H',mem:false,pre:[['MOV DL, 08H'],['MOV AX, 0A9FH']]},
+ {n:'Direct',g:2,exp:'الـ EA هو رقم 16-bit <b>مكتوب مباشرة</b> بالتعليمة. الأقواس [ ] تعني «محتوى مكان الذاكرة». سميناه Direct لأن الـ displacement عن بداية الـ Segment مذكور مباشرة.',f:'EA = d16',pre:[['MOV BX, [1354H]'],['MOV BL, [0400H]'],['MOV [0500H], DX']]},
+ {n:'Register Indirect',g:2,exp:'اسم الرجستر اللي <b>يحمل الـ EA</b> مكتوب بالتعليمة: BX أو BP أو DI أو SI. الـ DS يُستخدم لحساب الـ base address (إلا مع BP يستخدم SS).',f:'EA = (BX) | (SI) | (DI) | (BP)',pre:[['MOV CX, [BX]'],['MOV AL, [DI]'],['MOV [BP], DX','','هنا لاحظ: BP يستخدم SS مو DS!']]},
+ {n:'Based',g:2,exp:'<b>BX أو BP</b> يحمل الـ base value + <b>displacement</b> (8-bit signed أو 16-bit). الـ 8-bit ينعمل له Sign Extension. مع BX نستخدم DS، ومع BP نستخدم SS.',f:'EA = (BX | BP) + disp',pre:[['MOV AX, [BX+08H]'],['MOV DH, [BX+700H]'],['MOV AX, [BP+4H]','','مع BP يُستخدم SS بدل DS']]},
+ {n:'Indexed',g:2,exp:'<b>SI أو DI</b> يحمل قيمة الـ index + <b>displacement</b>. الـ 8-bit ينعمل له Sign Extension قبل الجمع.',f:'EA = (SI | DI) + disp',pre:[['MOV CX, [SI+0A2H]','','القيمة A2H هي 8-bit سالبة (أكبر من 7FH)، فتنقلب إلى FFA2H بالـ Sign Extension'],['MOV [SI+20H], DX'],['MOV AX, [DI+10H]']]},
+ {n:'Based Indexed',g:2,exp:'الـ EA هو مجموع <b>base register (BX/BP)</b> + <b>index register (SI/DI)</b> + <b>displacement</b>.',f:'EA = (BX|BP) + (SI|DI) + disp',pre:[['MOV DX, [BX+SI+0AH]'],['MOV [BP+DI], CX'],['MOV AX, [BX+DI]']]}
+];
+function secModes(el){
+  head(el,'أنماط العنونة السبعة','اختار نمط، اضغط على تعليمة، وتابع الخطوات بالترتيب: نحسب EA، ثم BA، ثم PA، ثم تنتقل الداتا.');
+  el.insertAdjacentHTML('beforeend','<div class="tabs"></div><div class="body"></div>');
+  const tabs=el.querySelector('.tabs'),body=el.querySelector('.body');
+  function open(i){
+    tabs.querySelectorAll('.tab').forEach((t,j)=>t.classList.toggle('on',i===j));
+    const m=MODES[i];body.innerHTML='';
+    body.insertAdjacentHTML('beforeend',`<div class="card"><span class="tag ${m.g===1?'':'o'}">Group ${m.g===1?'I':'II'}</span> <b style="font-size:1.15rem">${i+1}. ${m.n} Addressing</b><p>${m.exp}</p><div>الصيغة: ${c(m.f)}</div></div>`);
+    const pre=m.pre.map(p=>({code:p[0],note:p[2]?`<b>ملاحظة:</b> ${p[2]}`:null,fresh:true}));
+    simBlock(body,{
+      regs:MODE_REGS,memDefault:'pattern',default:m.pre[0][0],presets:pre,
+      regGroups:[grp('General Purpose',['AX','BX','CX','DX']),grp('Pointer & Index',['SI','DI','BP']),grp('Segment',['DS','ES','SS'])],
+      panels:m.mem===false?[]:['mem'],hint:'اضغط على إحدى التعليمات الملونة فوق، أو اكتب تعليمة وأضغط Enter.'
+    });
+  }
+  MODES.forEach((m,i)=>{const b=document.createElement('button');b.className='tab';b.textContent=`${i+1}. ${m.n}`;b.onclick=()=>open(i);tabs.appendChild(b)});
+  open(0);
+}
+
+const EX_REGS={DS:0x3060,ES:0x4080,SS:0x9000,BX:0x490,SI:0x670,DI:0x2F5,BP:0x5D42};
+const EX=['MOV AX,[500H]','MOV CL,[BX]','MOV [SI+20H],DX','MOV [BP+DI],CX','MOV DH,[BX+700H]'];
+const MODE_NAMES=['Register','Immediate','Direct','Register Indirect','Based','Indexed','Based Indexed'];
+function exAnswer(code){
+  const st=newState({regs:EX_REGS,memDefault:'pattern'});
+  const r=analyze(code,st);return r.info;
+}
+function secEx(el){
+  head(el,'تمرين: احسب الـ EA والـ PA','نفس تمرين المحاضرة، والقيم المعطاة مكتوبة بالبطاقة الزرقاء تحت. جاوب بنفسك وبعدين اضغط «تحقق».');
+  el.insertAdjacentHTML('beforeend',`<div class="card soft"><b>قيم السجلات المعطاة:</b><div class="chips">${Object.entries(EX_REGS).map(([k,v])=>`<span class="chip" style="cursor:default">${k} = ${H(v)}</span>`).join('')}</div><div class="mini">الصيغة المستعملة: <span class="fs">PA = Segment × 10H + EA</span> . تذكّر: العنوان الذي يحتوي BP يستخدم SS، وغيره يستخدم DS.</div></div>`);
+  EX.forEach((code,i)=>{
+    const a=exAnswer(code);
+    const d=document.createElement('div');d.className='exq';
+    d.innerHTML=`<div><b>${i+1})</b> ${c(code)}</div><div class="fs">
+      <div><label>1. نمط العنونة</label><select class="fld" data-k="mode"><option value="">اختار…</option>${MODE_NAMES.map(m=>`<option>${m}</option>`).join('')}</select></div>
+      <div><label>2. حجم الـ Operand</label><select class="fld" data-k="size"><option value="">اختار…</option><option value="8">Byte</option><option value="16">Word</option></select></div>
+      <div><label>3. نوع النقل</label><select class="fld" data-k="rw"><option value="">اختار…</option><option>Read</option><option>Write</option></select></div>
+      <div><label>4. الـ EA (Hex)</label><input class="fld" data-k="ea" placeholder="e.g. 0500"></div>
+      <div><label>الـ Physical Address (Hex)</label><input class="fld" data-k="pa" placeholder="e.g. 30B00"></div></div>
+      <div class="ctl"><button class="btn" data-b="chk">تحقق</button><button class="btn sec" data-b="sol">اعرض الحل</button></div><div class="sol" hidden></div>`;
+    const sel=k=>d.querySelector(`[data-k=${k}]`);
+    const hx=s=>{s=s.trim().toUpperCase().replace(/H$/,'');return /^[0-9A-F]+$/.test(s)?parseInt(s,16):NaN};
+    d.querySelector('[data-b=chk]').onclick=()=>{
+      const ok={mode:sel('mode').value===a.mode,size:+sel('size').value===a.size,rw:sel('rw').value===a.rw,ea:hx(sel('ea').value)===a.ea,pa:hx(sel('pa').value)===a.pa};
+      for(const k in ok){sel(k).classList.remove('ok','no');sel(k).classList.add(ok[k]?'ok':'no')}
+      const n=Object.values(ok).filter(Boolean).length;
+      let msg=d.querySelector('.msg');if(!msg){msg=document.createElement('div');msg.className='msg mini';d.appendChild(msg)}
+      msg.innerHTML=n===5?'🎉 ممتاز! كلشي صح.':`${n} من 5 صح. تلميح: PA = Segment × 10H + EA ، ورجستر BP يستخدم SS.`;
+    };
+    d.querySelector('[data-b=sol]').onclick=()=>{
+      const s=d.querySelector('.sol');s.hidden=!s.hidden;
+      s.innerHTML=`Addressing mode: <b>${a.mode}</b><br>Size of operand: <b>${a.size===8?'Byte':'Word'}</b><br>Type of data transfer: <b>${a.rw}</b><br>${a.ma.eaL}<br>${a.ma.baL}<br>${a.ma.paL}`;
+    };
+    el.appendChild(d);
+  });
+}
+
+function secMov(el){
+  head(el,'MOV – نسخ البيانات','تنسخ القيمة من المصدر (Source) إلى الهدف (Destination). المصدر يبقى مثل ما هو. الاثنين لازم نفس الحجم: 8-bit مع 8-bit أو 16-bit مع 16-bit.');
+  el.insertAdjacentHTML('beforeend',`<div class="card"><table class="t"><tr><th>الصيغة</th><th>المعنى</th></tr>
+   <tr><td>${c('MOV reg2, reg1')}</td><td>(reg2) ← (reg1)</td></tr><tr><td>${c('MOV mem, reg1')}</td><td>(mem) ← (reg1)</td></tr><tr><td>${c('MOV reg2, mem')}</td><td>(reg2) ← (mem)</td></tr>
+   <tr><td>${c('MOV reg, data')}</td><td>(reg) ← data</td></tr><tr><td>${c('MOV mem, data')}</td><td>(mem) ← data</td></tr></table></div>`);
+  simBlock(el,{regs:{},default:'MOV AL, 20H',
+    regGroups:[grp('Data Registers (كل واحد يتقسم High / Low)',GEN)],
+    presets:[{code:'MOV AL, 20H',note:'AL هو النصف الواطي من AX. لاحظ AH ما تغير.'},{code:'MOV CX, 1234H',note:'CH=12H و CL=34H.'},{code:'MOV BX, CX',note:'<span class="fs">(BX) ← (CX)</span> والـ CX يبقى مثل ما هو.'},{code:'MOV AH, BL',kind:'bad',tip:'حجم مختلف',note:null},{code:'MOV DL, 1234H',kind:'bad'}],
+    hint:'جرب المثال الأول أول. اضغط على أي تعليمة. الأحمر أمثلة غلط ✗'});
+}
+function secLim(el){
+  head(el,'قيود MOV – شنو ما نگدر نسوي؟','اضغط على كل مثال غلط وشوف ليش يرفضه المعالج وشنو الحل.');
+  el.insertAdjacentHTML('beforeend',`<div class="grid2">
+   <div class="limit"><b>1) رقم مباشر لـ Segment Register</b><div class="row">${c('MOV DS, 10')}<span class="mini">ممنوع</span></div></div>
+   <div class="limit"><b>2) نسخ Segment Register لثاني</b><div class="row">${c('MOV ES, DS')}<span class="mini">ممنوع</span></div></div>
+   <div class="limit"><b>3) من ذاكرة لذاكرة</b><div class="row">${c('MOV [BX], [3000H]')}<span class="mini">ممنوع</span></div></div>
+   <div class="limit"><b>4) CS كـ Destination</b><div class="row">${c('MOV CS, AX')}<span class="mini">ممنوع</span></div></div></div>`);
+  simBlock(el,{regs:{DS:0x1000,ES:0x2000,SS:0x3000,CS:0x0100,BX:0x0100,AX:0x0010},default:'MOV DS, 10',
+    regGroups:[grp('General',['AX','BX']),grp('Segment',['DS','ES','SS','CS'])],panels:['mem'],memDefault:'pattern',
+    presets:[
+      {code:'MOV DS, 10',kind:'bad'},{code:'MOV ES, DS',kind:'bad'},{code:'MOV [BX], [3000H]',kind:'bad'},{code:'MOV CS, AX',kind:'bad'},
+      {code:'MOV DS, AX',kind:'good',note:'تمام ✔ هذا الحل الصحيح: نمرر القيمة عبر رجستر عام (AX) لحد ما نحطها بـ DS.'},
+      {code:'MOV AX, [3000H]',kind:'good',note:'الخطوة الأولى للحل: ننقل من الذاكرة إلى رجستر. وبعدها نسوي <span class="fs">MOV [BX], AX</span>.'},
+      {code:'MOV [BX], AX',kind:'good'}
+    ],hint:'الأحمر ممنوع ✗ والأخضر الحل ✔'});
+}
+function secXchg(el){
+  head(el,'XCHG – تبديل المحتوى','تبدّل محتوى المعاملين مع بعض: (reg2) ↔ (reg1). لازم يكون واحد منهم رجستر على الأقل، وبنفس الحجم.');
+  simBlock(el,{regs:{DS:0x3060,BX:0x0490},default:'MOV AX, 1234H',memDefault:'pattern',
+    regGroups:[grp('Data Registers',GEN),grp('Segment / Index',["DS"])],panels:['mem'],
+    presets:[{code:'MOV AX, 1234H',fresh:true},{code:'MOV DX, 5678H'},{code:'XCHG AX, DX',note:'قبل التبديل: <span class="fs">AX=1234H , DX=5678H</span> . بعد التبديل: <span class="fs">AX=5678H , DX=1234H</span>'},{code:'XCHG AL, AH'},{code:'XCHG CX, [BX]',tip:'رجستر مع ذاكرة'},{code:'XCHG [BX], [SI]',kind:'bad'}],
+    hint:'جرب بالترتيب: MOV AX,1234H ثم MOV DX,5678H ثم XCHG AX,DX'});
+}
+function secStack(el){
+  head(el,'PUSH و POP – الستاك','الستاك (Stack) مكان بالذاكرة للتخزين المؤقت للداتا والعناوين، حجمه 64KB ويشتغل من الـ SS:SP. الـ SP دائماً يشير لقمة الستاك (TOS).');
+  el.insertAdjacentHTML('beforeend',`<div class="grid2"><div class="card"><b>PUSH</b><div class="mono" dir="ltr" style="text-align:left">(SP) ← (SP) − 2<br>P.A of TOS = (SS)×10H + SP<br>(TOS) ← (reg16)</div></div>
+   <div class="card"><b>POP</b><div class="mono" dir="ltr" style="text-align:left">P.A of TOS = (SS)×10H + SP<br>(reg16) ← (TOS)<br>(SP) ← (SP) + 2</div></div></div>`);
+  simBlock(el,{regs:{SS:0x3000,SP:0x2008,BX:0x543B,CX:0x678C},default:'PUSH BX',
+    regGroups:[grp('Registers',['AX','BX','CX','DX']),grp('Stack Pointer',['SS','SP'])],panels:['stack'],
+    presets:[
+      {code:'PUSH BX',note:'BX=543BH: الواطي 3BH بالعنوان الأصغر 32006، والعالي 54H بـ 32007.'},{code:'PUSH CX'},
+      {code:'POP CX',note:'آخر شي دخل أول شي يطلع (LIFO). لاحظ القيمة تبقى بالذاكرة بس SP يزيد.'},{code:'POP BX'},{code:'POP AX'},{code:'PUSH AL',kind:'bad'},{code:'PUSH 5',kind:'bad'}
+    ],hint:'جرب: PUSH BX ثم PUSH CX ثم POP AX ثم POP DX – شنو تتوقع بالـ AX والـ DX؟'});
+}
+function secLea(el){
+  head(el,'LEA / LDS / LES','LEA تجيب <b>العنوان</b> (EA) مو المحتوى. LDS و LES يقروا 4 بايت من الذاكرة: أول Word للرجستر، وثاني Word لـ DS أو ES.');
+  el.insertAdjacentHTML('beforeend',`<div class="card"><table class="t"><tr><th>التعليمة</th><th>المعنى</th></tr><tr><td>${c('LEA reg16, EA')}</td><td><span class="fs">EA → (reg16)</span></td></tr><tr><td>${c('LDS reg16, [PA]')}</td><td><span class="fs">[PA] → (reg16) , [PA+2] → (DS)</span></td></tr><tr><td>${c('LES reg16, [PA]')}</td><td><span class="fs">[PA] → (reg16) , [PA+2] → (ES)</span></td></tr></table>
+   <p class="mini">القيم مثل المحاضرة: <span class="fs">BX=100H , DI=200H , DS=1200H , SI=F002H</span> والذاكرة تبدأ من <span class="fs">12300H</span>. كل تعليمة تبدأ من نفس الحالة الأولية.</p></div>`);
+  simBlock(el,{regs:{BX:0x100,DI:0x200,DS:0x1200,SI:0xF002},memBase:0x12300,memSeed:[[0x12300,0x11,0xAA,0xEF,0x80,0x47,0x8D,0x5A,0x92,0xC5]],default:'LEA SI, [DI+BX+2H]',
+    regGroups:[grp('Registers',['AX','BX','SI','DI']),grp('Segment',['DS','ES'])],panels:['mem'],
+    presets:[
+      {code:'LEA SI, [DI+BX+2H]',fresh:true,note:'<b>A)</b> الناتج هو العنوان نفسه: <span class="fs">SI = 0200H + 0100H + 0002H = <b>0302H</b></span>'},
+      {code:'MOV SI, [DI+BX+2H]',fresh:true,note:'<b>B)</b> نفس العنوان <span class="fs">EA=0302H</span> لكن MOV تروح للذاكرة (<span class="fs">PA=12302H</span>) وتجيب المحتوى فيصير <span class="fs">SI=<b>80EFH</b></span>. هذا هو الفرق بين LEA و MOV!'},
+      {code:'LDS AX, [305H]',fresh:true,note:'<b>C)</b> يصير <span class="fs">AX=5A8DH</span> و <span class="fs">DS=C592H</span> (لاحظ إن DS تغيّر!)'},
+      {code:'LES AX, [DI+BX]',fresh:true,note:'<b>D)</b> يصير <span class="fs">AX=AA11H</span> و <span class="fs">ES=80EFH</span>'}
+    ],hint:'اضغط على A ثم B وقارن الناتج لـ SI.'});
+}
+function secIO(el){
+  head(el,'IN و OUT – التعامل مع الـ I/O Ports','IN تجيب داتا من Input Port إلى AL (8-bit) أو AX (16-bit). OUT ترسل AL أو AX إلى Output Port. رقم البورت يكون 8-bit مباشر أو يجي من DX.');
+  el.insertAdjacentHTML('beforeend',`<div class="card"><table class="t"><tr><th>IN</th><th>OUT</th></tr><tr><td>${c('IN AL, addr8')} · ${c('IN AX, addr8')}</td><td>${c('OUT addr8, AL')} · ${c('OUT addr8, AX')}</td></tr><tr><td>${c('IN AL, DX')} · ${c('IN AX, DX')}</td><td>${c('OUT DX, AL')} · ${c('OUT DX, AX')}</td></tr></table></div>`);
+  simBlock(el,{regs:{},inValue:0x0F,ioDir:'in',default:'IN AL, 18H',
+    regGroups:[grp('Registers',['AX','DX'])],panels:['io'],
+    presets:[
+      {code:'IN AL, 18H',fresh:true,set:{IN:0x0F},note:'بورت 18H يرسل 0FH فيصير <span class="fs">AL=0FH</span>'},
+      {code:'IN AX, 34H',fresh:true,set:{IN:0x0167},note:'16-bit: AH=01H ، AL=67H'},
+      {code:'MOV DX, 30F2H',fresh:true},{code:'IN AL, DX',set:{IN:0x0F},note:'رقم البورت 30F2H أكبر من 8-bit فلازم يجي من DX'},
+      {code:'MOV AL, 7FH',fresh:true},{code:'OUT 3BH, AL',note:'القيمة 7FH تنتقل من AL إلى بورت 3BH ثم لوحدة الإخراج.'},{code:'OUT 3BH, BL',kind:'bad'},{code:'IN AL, 300H',kind:'bad'}
+    ],hint:'مثال المحاضرة: MOV AL,7FH ثم OUT 3BH,AL'});
+}
+
+
+/* ===== Language (IP & Flags sections are bilingual) ===== */
+let LANG='ar';
+const T=(a,e)=>LANG==='en'?e:a;
+function langBar(el){
+  el.insertAdjacentHTML('afterbegin',`<div class="langbar"><button class="btn sec" type="button">${LANG==='ar'?'English':'العربية'}</button></div>`);
+  el.querySelector('.langbar button').onclick=()=>setLang(LANG==='ar'?'en':'ar');
+}
+/* ===== ALU + Flags ===== */
+const par=v=>{let n=0;for(let i=0;i<8;i++)n+=(v>>i)&1;return n};
+function aluOp(op,a,b,size,cf0){
+  const mask=size===8?0xFF:0xFFFF,msb=size===8?0x80:0x8000;
+  a&=mask;b&=mask;if(op==='INC'||op==='DEC')b=1;
+  let res,CF=false,OF=false,AF=false;
+  if(op==='ADD'||op==='INC'){const r=a+b;res=r&mask;CF=r>mask;OF=((a^res)&(b^res)&msb)!==0;AF=((a^b^res)&0x10)!==0}
+  else if(['SUB','CMP','DEC'].includes(op)){const r=a-b;res=r&mask;CF=a<b;OF=((a^b)&(a^res)&msb)!==0;AF=((a^b^res)&0x10)!==0}
+  else{res=op==='AND'?a&b:op==='OR'?a|b:a^b}
+  if(op==='INC'||op==='DEC')CF=!!cf0;
+  return {res,a,b,fl:{CF,PF:par(res&255)%2===0,AF,ZF:res===0,SF:(res&msb)!==0,OF}};
+}
+const FL_BITS=[[15,''],[14,''],[13,''],[12,''],[11,'OF'],[10,'DF'],[9,'IF'],[8,'TF'],[7,'SF'],[6,'ZF'],[5,''],[4,'AF'],[3,''],[2,'PF'],[1,''],[0,'CF']];
+function secFlags(el){
+  langBar(el);
+  head(el,T('سجل الأعلام (Flags Register)','The Flags Register'),
+    T('بعد كل عملية حسابية أو منطقية يحدّث المعالج مجموعة من البتات تُسمّى الأعلام (Flags) تصف نتيجة العملية. سجل الأعلام عرضه 16 بتاً، يُستخدم منه تسعة: <b>ستة أعلام حالة</b> (Status Flags) تنتج عن العملية، و<b>ثلاثة أعلام تحكّم</b> (Control Flags) يضبطها المبرمج.',
+      'After every arithmetic or logic operation the CPU updates a group of bits called <b>flags</b> that describe the result. The flag register is 16 bits wide and 9 bits are used: <b>six status flags</b> set by the operation, and <b>three control flags</b> set by the programmer.'));
+  el.insertAdjacentHTML('beforeend',`<div class="card">
+   <div class="ctl"><select class="fld" id="fOp">${['ADD','SUB','CMP','INC','DEC','AND','OR','XOR'].map(o=>`<option>${o}</option>`).join('')}</select>
+   <span>A =</span><input class="fld" id="fA" value="FF" style="width:90px"><span>B =</span><input class="fld" id="fB" value="01" style="width:90px">
+   <select class="fld" id="fS"><option value="8">8-bit</option><option value="16">16-bit</option></select>
+   <label class="mini" style="display:flex;gap:6px;align-items:center"><input type="checkbox" id="fPr"> ${T('وضع التوقّع (Predict mode)','Predict mode')}</label>
+   <button class="btn ok" id="fRv" hidden>${T('اكشف الأعلام','Reveal flags')}</button></div>
+   <div class="chips" id="fP"></div>
+   <div id="fBits"></div><div id="fCmd" class="mini" style="margin:4px 0"></div>
+   <div class="panel" style="margin-top:10px"><div class="pt">FLAG REGISTER</div><div class="flr" id="fReg"></div></div>
+   <div class="fe" id="fExp"></div>
+   <h3>🔀 ${T('القفزات الشرطية بعد هذه العملية','Conditional jumps after this operation')}</h3>
+   <div class="mini">${T('تفحص القفزة الشرطية (Jcc) الأعلام: إن تحقق الشرط تغيّر قيمة IP (يحدث قفز)، وإلا تابع المعالج بالتعليمة التالية.','A conditional jump (Jcc) tests the flags: if the condition holds it changes IP (the jump is taken); otherwise execution continues with the next instruction.')}</div><div class="jt" id="fJ"></div></div>`);
+  const $=i=>el.querySelector('#'+i);
+  const ctl={DF:false,IF:true,TF:false};
+  let revealed=true;
+  const pre=[
+   ['ADD','FF','01',8,T(`ناتج ${c('FFH + 01H')} هو ${c('00H')} مع خروج رقم محمول، فيصبح CF و ZF و AF و PF كلها 1.`,`${c('FFH + 01H')} gives ${c('00H')} with a carry out, so CF, ZF, AF and PF all become 1.`)],
+   ['ADD','7F','01',8,T(`ناتج ${c('127 + 1')} يظهر كالعدد ${c('-128')} بالإشارة، فيصبح OF و SF مساويين 1.`,`${c('127 + 1')} appears as ${c('-128')} in signed form, so OF and SF become 1.`)],
+   ['SUB','05','05',8,T(`ناتج ${c('5 − 5')} هو صفر، فيصبح ZF=1 (العددان متساويان).`,`${c('5 − 5')} is zero, so ZF=1 (the two numbers are equal).`)],
+   ['SUB','03','05',8,T(`في ${c('3 − 5')} يحدث استلاف (borrow) فيصبح CF=1، والناتج سالب فيصبح SF=1.`,`${c('3 − 5')} needs a borrow so CF=1, and the result is negative so SF=1.`)],
+   ['CMP','0A','03',8,T(`تقارن ${c('CMP')} من دون تخزين الناتج. لاحظ القفزات في الأسفل: JA و JG تتحققان لأن 10 أكبر من 3.`,`${c('CMP')} compares without storing the result. See the jumps below: JA and JG are taken because 10 is greater than 3.`)],
+   ['ADD','8000','8000',16,T(`في ${c('8000H + 8000H')} بحجم 16 بتاً يكون الناتج 0000H مع CF و OF و ZF.`,`${c('8000H + 8000H')} in 16 bits gives 0000H with CF, OF and ZF set.`)],
+   ['AND','F0','0F',8,T('تصفّر العمليات المنطقية العلمين CF و OF دائماً.','Logic operations always clear CF and OF.')]
+  ];
+  pre.forEach(p=>{const b=document.createElement('button');b.className='chip';b.textContent=`${p[0]} ${p[1]}H, ${p[2]}H`;b.onclick=()=>{$('fOp').value=p[0];$('fA').value=p[1];$('fB').value=p[2];$('fS').value=p[3];revealed=!$('fPr').checked;draw(p[4])};$('fP').appendChild(b)});
+  const grpBits=(v,n)=>{let h='<span class="g">';for(let i=n-1;i>=0;i--){h+=`<span class="bt">${(v>>i)&1}</span>`;if(i%4===0&&i)h+='</span><span class="g">'}return h+'</span>'};
+  let lastNote='';
+  function draw(note){
+    if(note!==undefined)lastNote=note;
+    const size=+$('fS').value,op=$('fOp').value,pr=$('fPr').checked,hid=pr&&!revealed;
+    $('fRv').hidden=!hid;
+    let a=parseInt($('fA').value,16),b=parseInt($('fB').value,16);if(isNaN(a))a=0;if(isNaN(b))b=0;
+    const mask=size===8?0xFF:0xFFFF;a&=mask;b&=mask;
+    const unary=op==='INC'||op==='DEC';$('fB').disabled=unary;
+    const r=aluOp(op,a,b,size,false),f=r.fl,w=size/4,sym={ADD:'+',INC:'+',SUB:'−',CMP:'−',DEC:'−',AND:'AND',OR:'OR',XOR:'XOR'}[op];
+    const sg=v=>size===8?(v>127?v-256:v):(v>32767?v-65536:v);
+    $('fBits').innerHTML=`<div class="bits"><span class="lb">A</span>${grpBits(a,size)}<span class="mono">= ${hex(a,w)}H</span></div>
+     <div class="bits"><span class="lb">${op} ${sym}</span>${grpBits(r.b,size)}<span class="mono">= ${hex(r.b,w)}H</span></div>
+     <div class="bits"><span class="lb">${T('الناتج','Result')}</span>${grpBits(r.res,size)}<span class="mono">= ${hex(r.res,w)}H ${op==='CMP'?T('(لا يُخزَّن)','(not stored)'):''}</span></div>`;
+    $('fCmd').innerHTML=`<span class="fs">unsigned: ${a} ${sym} ${r.b} → ${r.res}</span> &nbsp;|&nbsp; <span class="fs">signed: ${sg(a)} ${sym} ${sg(r.b)} → ${sg(r.res)}</span>`+(lastNote?`<div class="card soft" style="margin:6px 0">${lastNote}</div>`:'');
+    $('fReg').innerHTML=FL_BITS.map(([bit,n])=>{
+      if(!n)return `<div class="fb un"><small>bit ${bit}</small><b>—</b><i>x</i></div>`;
+      const ctrl=ctl[n]!==undefined,v=ctrl?ctl[n]:f[n];
+      if(!ctrl&&hid)return `<div class="fb"><small>bit ${bit}</small><b>${n}</b><i>?</i></div>`;
+      return `<div class="fb ${v?'on':''} ${ctrl?'ctl':''}" ${ctrl?`data-c="${n}" title="${T('اضغط للتبديل','Click to toggle')}"`:''}><small>bit ${bit}</small><b>${n}</b><i>${v?1:0}</i></div>`}).join('');
+    $('fReg').querySelectorAll('[data-c]').forEach(d=>d.onclick=()=>{ctl[d.dataset.c]=!ctl[d.dataset.c];draw()});
+    if(hid){
+      $('fExp').innerHTML=`<div><b>${T('توقّع أولاً!','Predict first!')}</b><div>${T('ما قيمة كل علم من CF و PF و AF و ZF و SF و OF بعد هذه العملية؟ فكّر في الأرقام أعلاه ثم اضغط «اكشف الأعلام».','What will CF, PF, AF, ZF, SF and OF be after this operation? Think about the bits above, then press “Reveal flags”.')}</div></div>`;
+      $('fJ').innerHTML='';return;
+    }
+    const logic=['AND','OR','XOR'].includes(op),ones=par(r.res&255),addlike=op==='ADD'||op==='INC';
+    const unch=(op==='INC'||op==='DEC')?T(' تنبيه: لا تغيّر INC و DEC العلم CF، فيبقى كما كان.',' Note: INC and DEC do not change CF; it keeps its old value.'):'';
+    const ex=[
+     ['CF','Carry Flag',f.CF,logic?T('تصفّر العمليات المنطقية CF دائماً.','Logic operations always clear CF.'):addlike?(f.CF?T('خرج رقم محمول (carry) من أعلى بت، أي أن الناتج لا يتسع في الأعداد غير المؤشَّرة (unsigned).','A carry came out of the top bit, so the result does not fit in unsigned arithmetic.'):T('لم يخرج رقم محمول من أعلى بت.','No carry came out of the top bit.')):(f.CF?T(`حدث استلاف (borrow) لأن A أصغر من B (${a} < ${r.b}) في الأعداد غير المؤشَّرة.`,`A borrow occurred because A is smaller than B (${a} < ${r.b}) in unsigned arithmetic.`):T('لم يحدث استلاف (A ≥ B).','No borrow occurred (A ≥ B).'))+unch],
+     ['PF','Parity Flag',f.PF,T(`عدد الواحدات في البتات الثمانية الدنيا من الناتج = ${ones}، وهو عدد ${ones%2===0?'زوجي فيكون PF=1':'فردي فيكون PF=0'}.`,`The low 8 bits of the result contain ${ones} one(s): ${ones%2===0?'an even count, so PF=1':'an odd count, so PF=0'}.`)],
+     ['AF','Auxiliary Carry',f.AF,logic?T('غير معرَّف (undefined) في العمليات المنطقية، ويُعرض هنا 0.','Undefined for logic operations; shown here as 0.'):T('رقم محمول أو استلاف بين البت 3 والبت 4 (نصف بايت)، ويُستخدم مع الأعداد العشرية المرمّزة BCD.','A carry or borrow between bit 3 and bit 4 (the half-byte boundary); used for BCD arithmetic.')],
+     ['ZF','Zero Flag',f.ZF,f.ZF?T('الناتج يساوي صفراً فيكون ZF=1، وبهذا تعرف CMP أن العددين متساويان.','The result is zero, so ZF=1. This is how CMP detects that two numbers are equal.'):T('الناتج لا يساوي صفراً فيكون ZF=0.','The result is not zero, so ZF=0.')],
+     ['SF','Sign Flag',f.SF,T(`البت الأعلى في الناتج = ${f.SF?1:0}، ${f.SF?'فالناتج سالب (بالإشارة)':'فالناتج موجب أو صفر'}.`,`The top bit of the result is ${f.SF?1:0}, so the result is ${f.SF?'negative (signed)':'positive or zero'}.`)],
+     ['OF','Overflow Flag',f.OF,logic?T('تصفّر العمليات المنطقية OF دائماً.','Logic operations always clear OF.'):f.OF?T('حدث فيض (overflow) في الأعداد المؤشَّرة: الناتج لا يتسع في الحجم المحدد (مثلاً موجب + موجب أعطى سالباً).','Signed overflow: the result does not fit the chosen size (for example positive + positive gave a negative).'):T('لم يحدث فيض في الأعداد المؤشَّرة.','No signed overflow occurred.')]
+    ];
+    const ctrlEx=[
+     ['DF','Direction Flag',ctl.DF,T('يحدد اتجاه عمليات السلاسل (String): CLD يصفّره (تصاعدي) وSTD يضبطه (تنازلي).','Sets the direction of string operations: CLD clears it (increment) and STD sets it (decrement).')],
+     ['IF','Interrupt Flag',ctl.IF,T('يفعّل المقاطعات القابلة للحجب: STI يضبطه وCLI يصفّره.','Enables maskable interrupts: STI sets it and CLI clears it.')],
+     ['TF','Trap Flag',ctl.TF,T('يشغّل وضع الخطوة الواحدة (Single-step) لأغراض التنقيح (Debug).','Turns on single-step mode for debugging.')]
+    ];
+    const card=e=>`<div class="${e[2]?'on':''}"><b class="n">${e[0]} = ${e[2]?1:0}</b> <span class="mini">${e[1]}</span><div>${e[3]}</div></div>`;
+    $('fExp').innerHTML=ex.map(card).join('')+ctrlEx.map(card).join('');
+    const jt=[['JE / JZ',T('يساوي','equal'),f.ZF],['JNE / JNZ',T('لا يساوي','not equal'),!f.ZF],['JA',T('أكبر (بلا إشارة)','above (unsigned)'),!f.CF&&!f.ZF],['JB / JC',T('أصغر (بلا إشارة)','below (unsigned)'),f.CF],['JG',T('أكبر (بإشارة)','greater (signed)'),!f.ZF&&f.SF===f.OF],['JL',T('أصغر (بإشارة)','less (signed)'),f.SF!==f.OF],['JS',T('سالب','negative'),f.SF],['JO',T('فيض','overflow'),f.OF]];
+    $('fJ').innerHTML=jt.map(j=>`<div class="${j[2]?'y':'n'}">${j[2]?'✔':'✗'} ${j[0]}<br><span style="font-family:inherit;font-size:.8rem">${j[1]}</span></div>`).join('');
+  }
+  ['fOp','fA','fB','fS'].forEach(i=>$(i).addEventListener('input',()=>{revealed=!$('fPr').checked;draw()}));
+  $('fPr').addEventListener('change',()=>{revealed=!$('fPr').checked;draw()});
+  $('fRv').onclick=()=>{revealed=true;draw()};
+  draw(pre[0][4]+' '+T('جرّب الأمثلة أعلاه.','Try the examples above.'));
+}
+
+/* ===== Instruction Pointer ===== */
+const IPCS=0x2000;
+function ipProgs(){return {
+ sum:{name:T('١) برنامج جمع','1) Addition program'),code:[
+  {t:'MOV AX, 0005H',b:[0xB8,0x05,0x00],ex:S=>{S.AX=5}},
+  {t:'MOV BX, 0003H',b:[0xBB,0x03,0x00],ex:S=>{S.BX=3}},
+  {t:'ADD AX, BX',b:[0x01,0xD8],ex:S=>{const r=aluOp('ADD',S.AX,S.BX,16);S.AX=r.res;S.fl=r.fl},fl:1},
+  {t:'HLT',b:[0xF4],halt:1}]},
+ loop:{name:T('٢) حلقة بالتعليمة JNZ','2) Loop with JNZ'),code:[
+  {t:'MOV CX, 0003H',b:[0xB9,0x03,0x00],ex:S=>{S.CX=3}},
+  {t:'DEC CX',b:[0x49],ex:S=>{const r=aluOp('DEC',S.CX,1,16,S.fl.CF);S.CX=r.res;S.fl=r.fl},fl:1},
+  {t:'JNZ 0003H',b:[0x75,0xFD],jcc:s=>!s.fl.ZF,cond:'ZF'},
+  {t:'HLT',b:[0xF4],halt:1}]},
+ jmp:{name:T('٣) JMP تتخطى تعليمة','3) JMP skips an instruction'),code:[
+  {t:'MOV AX, 0001H',b:[0xB8,0x01,0x00],ex:S=>{S.AX=1}},
+  {t:'JMP 0008H',b:[0xEB,0x03],jcc:()=>true},
+  {t:'MOV AX, 0002H',b:[0xB8,0x02,0x00],ex:S=>{S.AX=2}},
+  {t:'HLT',b:[0xF4],halt:1}]}
+}}
+function secIP(el){
+  langBar(el);
+  head(el,T('مؤشّر التعليمات (Instruction Pointer – IP)','The Instruction Pointer (IP)'),
+    T('IP سجل عرضه 16 بتاً يشير إلى <b>التعليمة التالية</b> التي يجب جلبها من الذاكرة. يشكّل مع السجل CS عنوانها الفيزيائي: <span class="fs">PA = CS × 10H + IP</span>. لا يستطيع المبرمج الكتابة فيه بالتعليمة MOV؛ فهو يتغيّر تلقائياً، أو بتعليمات القفز (JMP, Jcc, CALL, RET).',
+      'IP is a 16-bit register that points to the <b>next instruction</b> to be fetched from memory. Together with CS it forms the instruction’s physical address: <span class="fs">PA = CS × 10H + IP</span>. A program cannot write to it with MOV; it changes automatically, or through jump instructions (JMP, Jcc, CALL, RET).'));
+  el.insertAdjacentHTML('beforeend',`<div class="card soft"><b>${T('دورة تنفيذ التعليمة (ثلاث مراحل):','The instruction cycle (three phases):')}</b><ol>
+   <li>${T('<b>الجلب (Fetch):</b> تحسب وحدة BIU العنوان من CS:IP وتجلب بايتات التعليمة من الذاكرة.','<b>Fetch:</b> the BIU computes the address from CS:IP and reads the instruction bytes from memory.')}</li>
+   <li>${T('<b>زيادة IP:</b> تُضاف إلى IP طول التعليمة (1 أو 2 أو 3 بايتات)، أي <span class="fs">IP ← IP + length</span>، فيشير إلى التعليمة التالية.','<b>IP increment:</b> IP ← IP + instruction length (1, 2 or 3 bytes), so it points to the following instruction.')}</li>
+   <li>${T('<b>التنفيذ (Execute):</b> تنفّذ وحدة EU التعليمة. وإن كانت قفزة تغيّرت قيمة IP إلى عنوان الهدف.','<b>Execute:</b> the EU executes the instruction. If it is a jump, IP is replaced by the target address.')}</li></ol></div>
+   <div class="tabs" id="ipT"></div><div id="ipB"></div>`);
+  const tabs=el.querySelector('#ipT'),B=el.querySelector('#ipB');
+  const PR=ipProgs();
+  let S,prog,log,predict=false,curK='sum';
+  const layout=code=>{let a=0;return code.map(i=>{const o={...i,addr:a};a+=i.b.length;return o})};
+  function load(k){
+    curK=k;prog=layout(PR[k].code);S={AX:0,BX:0,CX:0,ip:0,cur:null,phase:0,halted:false,fl:{CF:false,ZF:false,SF:false},chg:null,msg:''};log=[];
+    tabs.querySelectorAll('.tab').forEach(t=>t.classList.toggle('on',t.dataset.k===k));draw();
+  }
+  function step(force){
+    if(S.halted)return;
+    S.chg=null;
+    if(S.phase===1&&predict&&!force){
+      const g=parseInt((B.querySelector('#ipG')||{}).value,16),exp=(S.ip+S.cur.b.length)&0xFFFF;
+      if(g!==exp){S.msg=T('غير صحيح. تذكّر: قيمة IP الجديدة = قيمة IP الحالية + طول التعليمة (بالبايت).','Not correct. Remember: new IP = current IP + instruction length (in bytes).');draw();return}
+      S.msg='✔ '+T('توقّعك صحيح!','Correct!');
+    }else S.msg='';
+    if(S.phase===0){
+      const ins=prog.find(i=>i.addr===S.ip);
+      if(!ins){log.push(T('❌ يشير IP إلى موضع ليس بداية تعليمة؛ البرنامج معطوب.','❌ IP points into the middle of an instruction; the program is broken.'));S.halted=true;draw();return}
+      S.cur=ins;const pa=(IPCS*16+S.ip)&0xFFFFF,bs=ins.b.map(x=>hex(x,2)).join(' ');
+      log.push(T(`<b>الجلب (Fetch):</b> <span class="fs">PA = ${H(IPCS)} × 10H + ${H(S.ip)} = ${H(pa,5)}</span><br>تُجلب البايتات ${c(bs)} فتكون التعليمة ${c(ins.t)} وطولها ${ins.b.length} بايت.`,
+                 `<b>Fetch:</b> <span class="fs">PA = ${H(IPCS)} × 10H + ${H(S.ip)} = ${H(pa,5)}</span><br>The bytes ${c(bs)} are read: the instruction is ${c(ins.t)}, ${ins.b.length} byte(s) long.`));
+      S.phase=1;
+    }else if(S.phase===1){
+      const old=S.ip;S.ip=(S.ip+S.cur.b.length)&0xFFFF;S.chg='ip';
+      log.push(T(`<b>زيادة IP:</b> <span class="fs">IP = ${H(old)} + ${S.cur.b.length} = ${H(S.ip)}</span><br>أصبح IP يشير إلى التعليمة التالية.`,
+                 `<b>IP increment:</b> <span class="fs">IP = ${H(old)} + ${S.cur.b.length} = ${H(S.ip)}</span><br>IP now points to the next instruction.`));
+      S.phase=2;
+    }else{
+      const ins=S.cur;let msg=T(`<b>التنفيذ (Execute):</b> ${c(ins.t)}`,`<b>Execute:</b> ${c(ins.t)}`);
+      if(ins.halt){S.halted=true;msg+='<br>⏹ '+T('توقّف المعالج (HLT) وانتهى البرنامج.','The CPU halts (HLT). The program is finished.')}
+      else if(ins.jcc){
+        const taken=ins.jcc(S);
+        if(taken){const rel=ins.b[1]>127?ins.b[1]-256:ins.b[1],old=S.ip;S.ip=(S.ip+rel)&0xFFFF;S.chg='ip';
+          msg+='<br>'+T(`تحقق الشرط فيحدث <b>قفز</b>: <span class="fs">IP = ${H(old)} + (${rel}) = ${H(S.ip)}</span>`,`The condition holds, so the jump is <b>taken</b>: <span class="fs">IP = ${H(old)} + (${rel}) = ${H(S.ip)}</span>`)}
+        else msg+='<br>'+T('لم يتحقق الشرط فلا قفز، ويتابع المعالج بالتعليمة التالية.','The condition is false, so no jump: execution continues with the next instruction.');
+        if(ins.cond)msg+=` <span class="mini">(ZF=${S.fl.ZF?1:0})</span>`;
+      }else{
+        ins.ex(S);
+        if(ins.fl)msg+='<br>'+T(`تحدّثت الأعلام: ZF=${S.fl.ZF?1:0} ، CF=${S.fl.CF?1:0} ، SF=${S.fl.SF?1:0}`,`Flags updated: ZF=${S.fl.ZF?1:0}, CF=${S.fl.CF?1:0}, SF=${S.fl.SF?1:0}`);
+      }
+      log.push(msg);S.phase=0;
+    }
+    draw();
+  }
+  function draw(){
+    const pa=(IPCS*16+S.ip)&0xFFFFF;
+    const bytes=[];prog.forEach(i=>i.b.forEach((x,k)=>bytes.push({a:i.addr+k,x,ins:i})));
+    const cells=bytes.map(b=>{
+      const ci=S.cur&&S.phase>=1&&b.ins===S.cur;
+      return `<div><div class="ptr">${b.a===S.ip?'▼ IP':''}</div><div class="mcell ${ci?'ci':''} ${b.a===S.ip?'ipc':''}"><div class="ma">${hex(b.a,4)}</div><div class="mv">${hex(b.x,2)}</div></div></div>`}).join('');
+    const rg=(n,v,cls='')=>`<div class="reg w ${cls}"><div class="rn">${n}</div><div class="cells"><input value="${hex(v,4)}" readonly></div></div>`;
+    const lab=[T('▶ الجلب (Fetch)','▶ Fetch'),predict?T('⏭ تحقّق من توقّعي','⏭ Check my guess'):T('⏭ زيادة IP','⏭ Increment IP'),T('⏭ التنفيذ (Execute)','⏭ Execute')][S.phase];
+    const guess=predict&&S.phase===1&&!S.halted?`<div class="card soft" style="margin:10px 0"><b>${T('توقّع:','Predict:')}</b> ${T(`ستُجلب التعليمة ${c(S.cur.t)} وطولها ${S.cur.b.length} بايت وقيمة IP الحالية ${c(H(S.ip))}. ما قيمة IP بعد الزيادة؟`,`The instruction ${c(S.cur.t)} is ${S.cur.b.length} byte(s) long and IP is currently ${c(H(S.ip))}. What will IP be after the increment?`)} <input class="fld" id="ipG" placeholder="0000" style="width:100px"></div>`:'';
+    B.innerHTML=`<div class="card"><div class="ctl"><button class="btn" id="ipN" ${S.halted?'disabled':''}>${S.halted?T('⏹ انتهى','⏹ Finished'):lab}</button><button class="btn sec" id="ipA" ${S.halted?'disabled':''}>${T('⏩ تعليمة كاملة','⏩ Whole instruction')}</button><button class="btn sec" id="ipR">${T('↺ من البداية','↺ Restart')}</button>
+      <label class="mini" style="display:flex;gap:6px;align-items:center"><input type="checkbox" id="ipP" ${predict?'checked':''}> ${T('وضع التوقّع (Predict mode)','Predict mode')}</label></div>${guess}${S.msg?`<div class="mini" style="margin:6px 0;font-weight:700">${S.msg}</div>`:''}
+     <div class="panels"><div class="panel"><div class="pt">CS : IP</div><div class="regs">${rg('CS',IPCS)}${rg('IP',S.ip,S.chg==='ip'?'fl':'')}</div><div class="mono" dir="ltr" style="margin-top:6px;text-align:left">PA = ${hex(pa,5)}H</div></div>
+      <div class="panel"><div class="pt">REGISTERS & FLAGS</div><div class="regs">${rg('AX',S.AX)}${rg('BX',S.BX)}${rg('CX',S.CX)}</div><div class="flr" style="margin-top:6px">${['ZF','CF','SF'].map(n=>`<div class="fb ${S.fl[n]?'on':''}"><b>${n}</b><i>${S.fl[n]?1:0}</i></div>`).join('')}</div></div>
+      <div class="panel" style="grid-column:1/-1"><div class="pt">${T('البرنامج في الذاكرة (Offset ← Byte)','PROGRAM IN MEMORY (Offset ← Byte)')} &nbsp; CS=${H(IPCS)}</div><div class="ipm">${cells}</div>
+       <table class="t" dir="ltr" style="margin-top:6px"><tr><th>Offset</th><th>Bytes</th><th>Instruction</th></tr>${prog.map(i=>`<tr style="${S.cur===i?'background:#eef1ff':''}"><td>${hex(i.addr,4)}</td><td>${i.b.map(x=>hex(x,2)).join(' ')}</td><td><b>${i.t}</b></td></tr>`).join('')}</table></div></div>
+     <div class="trace">${log.map((l,i)=>`<div class="st ${i===log.length-1?'cur':''}"><div class="n">${i+1}</div><div class="tx"><div class="l">${l}</div></div></div>`).join('')}</div></div>`;
+    B.querySelector('#ipN').onclick=()=>step();
+    B.querySelector('#ipA').onclick=()=>{let n=0;do{step(true)}while(!S.halted&&S.phase!==0&&n++<5)};
+    B.querySelector('#ipR').onclick=()=>load(curK);
+    B.querySelector('#ipP').onchange=e=>{predict=e.target.checked;draw()};
+    const g=B.querySelector('#ipG');if(g)g.addEventListener('keydown',e=>{if(e.key==='Enter')step()});
+  }
+  Object.keys(PR).forEach(k=>{const b=document.createElement('button');b.className='tab';b.dataset.k=k;b.textContent=PR[k].name;b.onclick=()=>load(k);tabs.appendChild(b)});
+  load('sum');
+}
+
+/* ===== Lectures 5-7: Arithmetic, Mul/Div, Logic, Shift/Rotate (bilingual) ===== */
+function biSim(el,cfg){cfg.bi=true;cfg.hint=cfg.hint||T('اضغط على إحدى التعليمات الجاهزة أعلاه أو اكتب تعليمتك ثم اضغط Enter.','Click one of the ready examples above, or type your own instruction and press Enter.');return simBlock(el,cfg)}
+function infoTbl(heads,rows){return `<div class="card"><table class="t"><tr>${heads.map(h=>`<th>${h}</th>`).join('')}</tr>${rows.map(r=>`<tr>${r.map((x,i)=>`<td>${i===0?`<b class="mono" dir="ltr">${x}</b>`:x}</td>`).join('')}</tr>`).join('')}</table></div>`}
+const P=(code,ar,en,extra)=>Object.assign({code,fresh:true,note:ar?`<b>${T('ملاحظة:','Note:')}</b> ${T(ar,en)}`:null},extra||{});
+const ARITH_REGS={AX:0x0050,BX:0x0100,CX:0x0003,DX:0x0007,SI:0x0200,DS:0x1000,SP:0x2000};
+function secArith(el){
+  langBar(el);
+  head(el,T('التعليمات الحسابية (Arithmetic Instructions)','Arithmetic Instructions'),
+    T('تُجري هذه التعليمات الجمع والطرح والمقارنة وتغيير الإشارة على البايتات والكلمات، وتحدّث أعلام الحالة (Status Flags) بحسب الناتج. اختر تعليمة جاهزة أو اكتب تعليمتك، وتابع الخطوات والأعلام.',
+      'These instructions add, subtract, compare and negate bytes and words, and update the status flags from the result. Pick a ready example or type your own, and follow the steps and the flags.'));
+  el.insertAdjacentHTML('beforeend',infoTbl([T('التعليمة','Instruction'),T('الوظيفة','Purpose'),T('الأعلام المتأثرة','Flags affected')],[
+    ['ADD Des, Src',T('جمع بايت مع بايت أو كلمة مع كلمة','Adds byte to byte or word to word'),'AF, CF, OF, PF, SF, ZF'],
+    ['ADC Des, Src',T('جمع المعاملين مع علم الحمل (Carry)','Adds the two operands with carry'),'AF, CF, OF, PF, SF, ZF'],
+    ['SUB Des, Src',T('طرح بايت من بايت أو كلمة من كلمة؛ ويعمل CF كعلم استلاف (Borrow)','Subtracts byte from byte or word from word; CF acts as the borrow flag'),'AF, CF, OF, PF, SF, ZF'],
+    ['SBB Des, Src',T('طرح المعاملين مع الاستلاف الناتج عن العملية السابقة','Subtracts the two operands with the borrow from the previous result'),'AF, CF, OF, PF, SF, ZF'],
+    ['INC Src',T('زيادة البايت أو الكلمة بمقدار واحد (سجل أو ذاكرة)','Increments the byte or word by one (register or memory)'),T('كل أعلام الحالة ما عدا CF','All status flags except CF')],
+    ['DEC Src',T('إنقاص البايت أو الكلمة بمقدار واحد (سجل أو ذاكرة)','Decrements the byte or word by one (register or memory)'),T('كل أعلام الحالة ما عدا CF','All status flags except CF')],
+    ['CMP Des, Src',T('مقارنة بطرح المصدر من الهدف داخلياً؛ لا تتغيّر قيمة المعاملين بل الأعلام فقط (CF, ZF, SF وغيرها)','Compares by internally subtracting Src from Des; the operands do not change, only the flags (CF, ZF, SF …)'),'AF, CF, OF, PF, SF, ZF'],
+    ['NEG Src',T('المتمم الثنائي (2’s complement) أي تغيير إشارة العدد','Two’s complement, i.e. changes the sign of a number'),'AF, CF, OF, PF, SF, ZF']
+  ])+`<div class="card soft">${T('<b>قاعدة المعاملات:</b> الهدف (Des) سجل أو ذاكرة، والمصدر (Src) سجل أو ذاكرة أو قيمة فورية (Immediate). لا يجوز أن يكون المعاملان في الذاكرة معاً.','<b>Operand rule:</b> Des is a register or memory; Src is a register, memory or an immediate value. Both operands cannot be in memory at the same time.')}</div>`);
+  biSim(el,{regs:ARITH_REGS,memBase:0x10100,memSeed:[[0x10100,0x34,0x12],[0x10200,0x05,0x00],[0x10500,0x10,0x00]],default:'ADD AL, 74H',
+    regGroups:[grp(T('سجلات البيانات','Data registers'),['AX','BX','CX','DX']),grp(T('مؤشر ومقطع','Index & segment'),['SI','DS'])],panels:['flags','mem'],
+    presets:[
+      P('ADD AL, 74H','AL=50H فيكون الناتج C4H. يصبح OF=1 لأن 80+116 يتجاوز حدّ الأعداد المؤشَّرة، و SF=1 لأن أعلى بت 1.','AL=50H so the result is C4H. OF=1 because 80+116 exceeds the signed range, and SF=1 because the top bit is 1.'),
+      P('ADD DX, AX','DX=0007H و AX=0050H فيصبح DX=0057H.','DX=0007H and AX=0050H so DX becomes 0057H.'),
+      P('ADD AX, [BX]','تُقرأ الكلمة 1234H من الذاكرة عند DS:BX وتُجمع إلى AX فيصبح AX=1284H.','The word 1234H is read from memory at DS:BX and added to AX, giving AX=1284H.'),
+      P('ADC DX, AX','CF=1 مضبوط مسبقاً، فيصبح الناتج 0007H + 0050H + 1 = 0058H.','CF=1 is preset, so the result is 0007H + 0050H + 1 = 0058H.',{set:{CF:1}}),
+      P('SUB BH, 74H','BH=01H أصغر من 74H فيحدث استلاف: CF=1 والناتج 8DH.','BH=01H is smaller than 74H so a borrow occurs: CF=1 and the result is 8DH.'),
+      P('SUB CX, BX','CX=0003H و BX=0100H: الناتج FF03H مع CF=1 (استلاف) و SF=1.','CX=0003H and BX=0100H: the result is FF03H with CF=1 (borrow) and SF=1.'),
+      P('SUB AX, [500H]','العنوان المباشر 500H: الكلمة 0010H فيصبح AX=0040H.','Direct address 500H holds 0010H, so AX becomes 0040H.'),
+      P('SBB CX, BX','CF=1 مضبوط مسبقاً فيُطرح BX و CF معاً: 0003H − 0100H − 1.','CF=1 is preset so both BX and CF are subtracted: 0003H − 0100H − 1.',{set:{CF:1}}),
+      P('INC AX','تزيد AX بمقدار 1؛ لاحظ أن CF لا يتغيّر.','Increments AX by 1; notice that CF does not change.'),
+      P('INC WORD PTR [SI]','الزيادة في الذاكرة: الكلمة عند DS:SI تصبح 0006H. نحتاج WORD PTR لتحديد الحجم.','Incrementing memory: the word at DS:SI becomes 0006H. WORD PTR is needed to give the size.'),
+      P('DEC AX','تنقص AX بمقدار 1.','Decrements AX by 1.'),
+      P('DEC WORD PTR [BX]','تنقص الكلمة عند DS:BX من 1234H إلى 1233H.','The word at DS:BX goes from 1234H to 1233H.'),
+      P('CMP AX, 50H','المقارنة بين قيمتين متساويتين: يصبح ZF=1، ولا تتغيّر AX.','Comparing two equal values: ZF=1, and AX is unchanged.'),
+      P('CMP AL, 80H','AL=50H أصغر من 80H (بلا إشارة) فيصبح CF=1 دون تغيير AL.','AL=50H is smaller than 80H (unsigned) so CF=1, with AL unchanged.'),
+      P('NEG AX','AX=0050H تصبح FFB0H (−80). المتمم الثنائي = المتمم الأحادي + 1.','AX=0050H becomes FFB0H (−80). Two’s complement = one’s complement + 1.'),
+      P('ADD [BX], [SI]',null,null,{kind:'bad'}),P('ADD AL, BX',null,null,{kind:'bad'})
+    ]});
+}
+const MD_REGS={AX:0x0014,BX:0x0005,CX:0,DX:0,SI:0,DS:0x1000,SP:0x2000};
+function secMulDiv(el){
+  langBar(el);
+  head(el,T('الضرب والقسمة (MUL, IMUL, DIV, IDIV)','Multiplication and Division (MUL, IMUL, DIV, IDIV)'),
+    T('تفترض هذه التعليمات أن أحد المعاملين موجود ضمناً في AL أو AX، ولذلك تحتاج إلى معامل واحد فقط (Src). الحرف I في IMUL و IDIV يدل على العمليات المؤشَّرة (Signed).',
+      'These instructions assume that one operand is implicitly in AL or AX, so they need only one operand (Src). The letter I in IMUL and IDIV stands for signed operations.'));
+  el.insertAdjacentHTML('beforeend',infoTbl([T('التعليمة','Instruction'),T('الوصف','Description'),T('النتيجة','Result')],[
+    ['MUL Src',T('ضرب بلا إشارة (Unsigned): بايتان ينتجان كلمة، وكلمتان تنتجان كلمة مزدوجة','Unsigned multiplication: two bytes give a word, two words give a double word'),'AX = AL × Src<br>DX:AX = AX × Src'],
+    ['IMUL Src',T('ضرب بإشارة (Signed)','Signed multiplication'),'AX = AL × Src<br>DX:AX = AX × Src'],
+    ['DIV Src',T('قسمة بلا إشارة: كلمة ÷ بايت، أو كلمة مزدوجة ÷ كلمة؛ المقسوم في AX (أو DX:AX) والمقسوم عليه Src','Unsigned division: word ÷ byte, or double word ÷ word; the dividend is in AX (or DX:AX) and the divisor is Src'),T('الخارج في <span class="fs">AL</span> والباقي في <span class="fs">AH</span> (كلمة ÷ بايت)<br>الخارج في <span class="fs">AX</span> والباقي في <span class="fs">DX</span> (كلمة مزدوجة ÷ كلمة)','Quotient in <span class="fs">AL</span>, remainder in <span class="fs">AH</span> (word ÷ byte)<br>Quotient in <span class="fs">AX</span>, remainder in <span class="fs">DX</span> (double word ÷ word)')],
+    ['IDIV Src',T('قسمة بإشارة (Signed) بالصيغة نفسها','Signed division in the same form'),T('الخارج في <span class="fs">AL</span> والباقي في <span class="fs">AH</span> (كلمة ÷ بايت)<br>الخارج في <span class="fs">AX</span> والباقي في <span class="fs">DX</span> (كلمة مزدوجة ÷ كلمة)','Quotient in <span class="fs">AL</span>, remainder in <span class="fs">AH</span> (word ÷ byte)<br>Quotient in <span class="fs">AX</span>, remainder in <span class="fs">DX</span> (double word ÷ word)')]
+  ])+`<div class="card soft">${T('<b>انتبه:</b> المعامل لا يكون قيمة فورية، ويحدّد حجمُه نوع العملية (بايت أو كلمة). عند القسمة على صفر أو إذا لم يتسع الخارج في السجل يحدث خطأ قسمة (Divide Error).','<b>Note:</b> the operand cannot be an immediate, and its size selects the operation (byte or word). Dividing by zero, or a quotient that does not fit in the register, causes a Divide Error.')}</div>`);
+  biSim(el,{regs:MD_REGS,default:'MUL BL',
+    regGroups:[grp(T('سجلات البيانات','Data registers'),['AX','BX','CX','DX'])],panels:['flags'],
+    presets:[
+      P('MUL BL','AL=14H (20) و BL=05H فيكون AX = 0064H (100)؛ وبما أن AH=0 يبقى CF=OF=0.','AL=14H (20) and BL=05H give AX = 0064H (100); AH=0 so CF=OF=0.'),
+      P('MUL BL','AL=FFH (255) و BL=FFH: الناتج FE01H، ويحتاج AH فيصبح CF=OF=1.','AL=FFH (255) and BL=FFH: the result FE01H needs AH, so CF=OF=1.',{set:{AX:0x00FF,BX:0x00FF}}),
+      P('IMUL BL','AL=FFH تساوي −1 بالإشارة، و BL=02H فيكون الناتج −2 = FFFEH. الناتج يتسع في AL بالإشارة فيبقى CF=OF=0.','AL=FFH is −1 signed and BL=02H so the result is −2 = FFFEH. It fits in AL as a signed value, so CF=OF=0.',{set:{AX:0x00FF,BX:0x0002}}),
+      P('MUL BX','AX=1000H و BX=0010H: الناتج 00010000H فيصبح DX:AX = 0001:0000 و CF=OF=1.','AX=1000H and BX=0010H: the result is 00010000H, so DX:AX = 0001:0000 and CF=OF=1.',{set:{AX:0x1000,BX:0x0010}}),
+      P('DIV BL','AX=0064H (100) ÷ 07H: الخارج 0EH (14) في AL والباقي 02H في AH.','AX=0064H (100) ÷ 07H: the quotient 0EH (14) goes to AL and the remainder 02H to AH.',{set:{AX:0x0064,BX:0x0007}}),
+      P('DIV BX','DX:AX = 0001:0000 (65536) ÷ 0010H: الخارج 1000H في AX والباقي 0 في DX.','DX:AX = 0001:0000 (65536) ÷ 0010H: the quotient 1000H goes to AX and the remainder 0 to DX.',{set:{AX:0x0000,DX:0x0001,BX:0x0010}}),
+      P('IDIV BL','AX=FF9CH (−100) ÷ 07H: الخارج −14 = F2H والباقي −2 = FEH (يأخذ إشارة المقسوم).','AX=FF9CH (−100) ÷ 07H: the quotient −14 = F2H and the remainder −2 = FEH (it takes the sign of the dividend).',{set:{AX:0xFF9C,BX:0x0007}}),
+      P('DIV BL','القسمة على صفر تسبّب Divide Error.','Division by zero causes a Divide Error.',{set:{AX:0x0064,BX:0x0000},kind:'bad'}),
+      P('DIV BL','AX=1000H ÷ 02H: الخارج 800H لا يتسع في AL (بايت واحد) فيحدث Divide Error.','AX=1000H ÷ 02H: the quotient 800H does not fit in AL (one byte), so a Divide Error occurs.',{set:{AX:0x1000,BX:0x0002},kind:'bad'})
+    ]});
+}
+const LG_REGS={AX:0x000F,BX:0x0079,CX:0,DX:0,DS:0x1000,SP:0x2000};
+function secLogic(el){
+  langBar(el);
+  head(el,T('التعليمات المنطقية (Logical Instructions)','Logical Instructions'),
+    T('تُجري هذه التعليمات عمليات منطقية بت ببت على المعاملين. تتتبع الخطوات هنا الأعداد الثنائية لترى كل بت وكيف يتغيّر.','These instructions perform bit-by-bit logic on their operands. The steps below show the binary numbers so you can see every bit change.'));
+  el.insertAdjacentHTML('beforeend',infoTbl([T('التعليمة','Instruction'),T('الوصف','Description'),T('الأعلام','Flags')],[
+    ['NOT Src',T('المتمم الأحادي (1’s complement): تُقلب كل بتات المعامل (سجل أو ذاكرة)','One’s complement: every bit of the operand (register or memory) is inverted'),T('لا تتأثر أي أعلام','No flags affected')],
+    ['AND Des, Src',T('عملية AND بين الهدف والمصدر؛ الناتج يُخزَّن في الهدف','AND of Des and Src; the result is stored in Des'),T('يصبح <span class="fs">CF=OF=0</span> وتُحدَّث <span class="fs">PF, SF, ZF</span>','<span class="fs">CF=OF=0</span>; <span class="fs">PF, SF, ZF</span> are updated')],
+    ['OR Des, Src',T('عملية OR بين الهدف والمصدر','OR of Des and Src'),T('يصبح <span class="fs">CF=OF=0</span> وتُحدَّث <span class="fs">PF, SF, ZF</span>','<span class="fs">CF=OF=0</span>; <span class="fs">PF, SF, ZF</span> are updated')],
+    ['XOR Des, Src',T('عملية XOR بين الهدف والمصدر','XOR of Des and Src'),T('يصبح <span class="fs">CF=OF=0</span> وتُحدَّث <span class="fs">PF, SF, ZF</span>','<span class="fs">CF=OF=0</span>; <span class="fs">PF, SF, ZF</span> are updated')],
+    ['TEST Des, Src',T('عملية AND دون تغيير الهدف (Non-destructive)؛ تتغيّر الأعلام فقط','AND without modifying Des (non-destructive); only the flags change'),T('يصبح <span class="fs">CF=OF=0</span> وتُحدَّث <span class="fs">PF, SF, ZF</span>','<span class="fs">CF=OF=0</span>; <span class="fs">PF, SF, ZF</span> are updated')]
+  ])+`<div class="card soft">${T('<b>قاعدة المعاملات:</b> المصدر قد يكون قيمة فورية أو سجلاً أو ذاكرة، والهدف سجل أو ذاكرة، ولا يجوز أن يكون الاثنان في الذاكرة معاً.','<b>Operand rule:</b> Src may be an immediate, register or memory; Des is a register or memory; both cannot be memory at the same time.')}</div>`);
+  biSim(el,{regs:LG_REGS,default:'AND AL, BL',
+    regGroups:[grp(T('سجلات البيانات','Data registers'),['AX','BX','CX','DX'])],panels:['flags'],
+    presets:[
+      P('NOT AL','AL=20H = 0010 0000 فتصبح 1101 1111 = DFH.','AL=20H = 0010 0000 becomes 1101 1111 = DFH.',{set:{AX:0x0020}}),
+      P('AND AL, BL','0000 1111 AND 0111 1001 = 0000 1001 = 09H. تُستعمل AND عادةً لتصفير بتات (Masking).','0000 1111 AND 0111 1001 = 0000 1001 = 09H. AND is commonly used to clear bits (masking).'),
+      P('OR AL, BL','0000 1111 OR 0111 1001 = 0111 1111 = 7FH. تُستعمل OR لضبط بتات.','0000 1111 OR 0111 1001 = 0111 1111 = 7FH. OR is commonly used to set bits.'),
+      P('XOR AL, BL','0000 1111 XOR 0111 1001 = 0111 0110 = 76H. تقلب XOR البتات المختلفة.','0000 1111 XOR 0111 1001 = 0111 0110 = 76H. XOR yields 1 where the bits differ.'),
+      P('TEST AL, 01H','يفحص البت الأول: AL=35H فردي فيبقى ZF=0، دون تغيير AL.','Tests bit 0: AL=35H is odd so ZF=0, and AL is unchanged.',{set:{AX:0x0035}}),
+      P('AND AL, 0FH','تصفّر النصف الأعلى: A7H تصبح 07H.','Clears the upper nibble: A7H becomes 07H.',{set:{AX:0x00A7}}),
+      P('XOR AX, AX','طريقة سريعة لتصفير السجل: يصبح AX=0000H و ZF=1.','A quick way to clear a register: AX becomes 0000H and ZF=1.',{set:{AX:0x1234}}),
+      P('OR AL, AL','لفحص الصفر: AL=00H فيصبح ZF=1.','A zero test: AL=00H so ZF=1.',{set:{AX:0x0000}})
+    ]});
+}
+const SH_REGS={AX:0x0033,BX:0x0100,CX:0x0003,DX:0,DS:0x1000,SP:0x2000};
+function secShift(el){
+  langBar(el);
+  head(el,T('الإزاحة والتدوير (Shift and Rotate)','Shift and Rotate Instructions'),
+    T('تحرّك هذه التعليمات بتات المعامل (سجل أو ذاكرة) لليمين أو لليسار. صيغتها <span class="fs">OP D, Count</span>، والعدّاد إمّا 1 أو السجل CL عندما يزيد العدد على 1. يظهر في كل خطوة مربّع CF أمام البتات.',
+      'These instructions move the bits of the operand (register or memory) left or right. The form is <span class="fs">OP D, Count</span>, where Count is 1, or the CL register when the count is greater than 1. Each step shows the CF box next to the bits.'));
+  el.insertAdjacentHTML('beforeend',infoTbl([T('التعليمة','Instruction'),T('الوصف','Description'),T('المخطط','Diagram')],[
+    ['SHL / SAL D, Count',T('إزاحة منطقية/حسابية لليسار: يدخل 0 من اليمين','Shift logic/arithmetic left: a 0 enters from the right'),'<span class="fs">CF ← [ b7 … b0 ] ← 0</span>'],
+    ['SHR D, Count',T('إزاحة منطقية لليمين: يدخل 0 من اليسار','Shift logic right: a 0 enters from the left'),'<span class="fs">0 → [ b7 … b0 ] → CF</span>'],
+    ['SAR D, Count',T('إزاحة حسابية لليمين: يبقى بت الإشارة','Shift arithmetic right: the sign bit is preserved'),'<span class="fs">b7 → [ b7 … b0 ] → CF</span>'],
+    ['RCL D, Count',T('تدوير لليسار عبر علم الحمل','Rotate left through carry'),'<span class="fs">CF ← [ b7 … b0 ] ← CF</span>'],
+    ['ROL D, Count',T('تدوير لليسار','Rotate left'),'<span class="fs">CF ← [ b7 … b0 ] ← b7</span>'],
+    ['ROR D, Count',T('تدوير لليمين','Rotate right'),'<span class="fs">b0 → [ b7 … b0 ] → CF, b0 → b7</span>'],
+    ['RCR D, Count',T('تدوير لليمين عبر علم الحمل','Rotate right through carry'),'<span class="fs">CF → [ b7 … b0 ] → CF</span>']
+  ])+`<div class="card soft">${T('<b>فائدة:</b> الإزاحة لليسار بمقدار n تضرب القيمة في 2<sup>n</sup>، والإزاحة لليمين تقسمها على 2<sup>n</sup> (SHR بلا إشارة، و SAR بإشارة). استخدم الأمر <span class="c">STC</span> لضبط CF قبل تجربة RCL و RCR.','<b>Tip:</b> shifting left by n multiplies by 2<sup>n</sup>, and shifting right divides by 2<sup>n</sup> (SHR unsigned, SAR signed). Use <span class="c">STC</span> to set CF before trying RCL and RCR.')}</div>`);
+  el.insertAdjacentHTML('beforeend',`<div class="card soft"><b>${T('لماذا تتطابق نتائج بعض التعليمات في أمثلة الشرائح؟','Why do some instructions give the same result in the slide examples?')}</b><ul>
+    <li>${T('<b>SHL مع ROL:</b> يختلفان فقط في البت الداخل من اليمين (0 في SHL، والبت الخارج في ROL). إذا كان البت الخارج 0 (مثل 33H) تتطابق النتيجتان.','<b>SHL vs ROL:</b> they differ only in the bit that enters from the right (0 for SHL, the bit that left for ROL). If the outgoing bit is 0 (as in 33H) the results match.')}</li>
+    <li>${T('<b>SHR مع ROR:</b> البت الداخل من اليسار هو 0 في SHR، والبت الخارج في ROR. إذا كان البت الخارج 0 تتطابقان.','<b>SHR vs ROR:</b> the bit entering from the left is 0 for SHR and the outgoing bit for ROR. If the outgoing bit is 0 they match.')}</li>
+    <li>${T('<b>SAR مع SHR:</b> تتطابقان إذا كان بت الإشارة 0. و<b>RCL/RCR</b> تعطيان نتيجة SHL/ROL (أو SHR/ROR) بحسب قيمة CF عند إزاحة واحدة، وتختلف عنهما عند إزاحتين أو أكثر.','<b>SAR vs SHR:</b> they match if the sign bit is 0. <b>RCL/RCR</b> match SHL/ROL (or SHR/ROR) depending on CF for a single shift, and differ from both for two or more shifts.')}</li></ul>
+    ${T('استعمل مختبر المقارنة التالي بقيم تُظهر الفرق (مثل B3H أو 85H مع عدّاد 2).','Use the comparison lab below with values that expose the differences (such as B3H or 85H with a count of 2).')}</div>
+    <div class="card"><h3>${T('مختبر المقارنة: التعليمات الثماني معاً','Comparison lab: all eight instructions together')}</h3>
+    <div class="ctl"><span>${T('القيمة (Hex):','Value (hex):')}</span><input class="fld" id="cV" value="B3" style="width:100px"><select class="fld" id="cS"><option value="8">8-bit</option><option value="16">16-bit</option></select><span>${T('عدد الإزاحات:','Count:')}</span><input class="fld" id="cN" value="2" style="width:70px"><label class="mini" style="display:flex;gap:6px;align-items:center"><input type="checkbox" id="cC"> CF = 1</label></div>
+    <div class="chips" id="cP"></div><div id="cT" style="margin-top:8px"></div></div>`);
+  (function lab(){
+    const $=i=>el.querySelector('#'+i);
+    [['B3','8','2',0],['B3','8','1',0],['85','8','2',0],['85','8','1',1],['33','8','1',1],['84','8','1',1]].forEach(a=>{const b=document.createElement('button');b.className='chip';b.textContent=`${a[0]}H, count ${a[2]}, CF=${a[3]}`;b.onclick=()=>{$('cV').value=a[0];$('cS').value=a[1];$('cN').value=a[2];$('cC').checked=!!a[3];draw()};$('cP').appendChild(b)});
+    function draw(){
+      const n=+$('cS').value,mask=n===8?0xFF:0xFFFF;let v=parseInt($('cV').value,16);if(isNaN(v))v=0;v&=mask;
+      let cnt=parseInt($('cN').value,10);if(isNaN(cnt)||cnt<0)cnt=0;if(cnt>16)cnt=16;const cf0=$('cC').checked;
+      const rows=['SHL','SAL','SHR','SAR','ROL','ROR','RCL','RCR'].map(m=>{let x=v,cf=cf0;for(let i=0;i<cnt;i++){const r=shiftOnce(m,x,cf,n);x=r.v;cf=r.cf}return {m,x,cf}});
+      const key=r=>r.x+'_'+r.cf;
+      $('cT').innerHTML=`<div class="bits"><span class="lb">${T('الأصل','Start')}</span><span class="bt cy">${cf0?1:0}</span>${bg(v,n)}<span class="mono">= ${H(v,n/4)}</span></div><table class="t" style="margin-top:6px"><tr><th>${T('التعليمة','Instruction')}</th><th>CF</th><th>${T('البتات','Bits')}</th><th>Hex</th><th>${T('تتطابق مع','Same as')}</th></tr>${rows.map(r=>{const same=rows.filter(o=>o!==r&&key(o)===key(r)).map(o=>o.m);return `<tr style="${same.length?'background:#fff8e1':''}"><td><b class="mono" dir="ltr">${r.m} ${cnt}</b></td><td class="mono">${r.cf?1:0}</td><td>${brow('',r.x,n)}</td><td class="mono">${H(r.x,n/4)}</td><td class="mono" dir="ltr">${same.join(', ')||'—'}</td></tr>`}).join('')}</table>`;
+    }
+    ['cV','cS','cN','cC'].forEach(i=>$(i).addEventListener('input',draw));draw();
+  })();
+  biSim(el,{regs:SH_REGS,memBase:0x10100,default:'SHL AL, 1',
+    regGroups:[grp(T('سجلات البيانات','Data registers'),['AX','BX','CX','DX'])],panels:['flags'],
+    presets:[
+      P('SHL AL, 1','AL=33H = 0011 0011 تصبح 0110 0110 = 66H (ضعف القيمة) و CF=0.','AL=33H = 0011 0011 becomes 0110 0110 = 66H (doubled) and CF=0.'),
+      P('SAL AL, 1','SAL مطابقة لـ SHL تماماً في كل الحالات.','SAL is identical to SHL in every case.'),
+      P('SHR AL, 1','AL=84H = 1000 0100 تصبح 0100 0010 = 42H و CF=0 (يدخل 0 من اليسار).','AL=84H = 1000 0100 becomes 0100 0010 = 42H and CF=0 (a 0 enters from the left).',{set:{AX:0x0084}}),
+      P('SAR AL, 1','AL=84H تصبح 1100 0010 = C2H لأن بت الإشارة (1) يُحفَظ.','AL=84H becomes 1100 0010 = C2H because the sign bit (1) is preserved.',{set:{AX:0x0084}}),
+      P('RCL AL, 1','CF=1 والقيمة 33H: يدخل CF من اليمين فتصبح 0110 0111 = 67H و CF=0.','CF=1 and the value 33H: CF enters from the right giving 0110 0111 = 67H, and CF=0.',{set:{AX:0x0033,CF:1}}),
+      P('ROL AL, 1','أعلى بت (0) يدخل من اليمين فتصبح 66H و CF=0. النتيجة مثل SHL هنا لأن البت الخارج صفر؛ جرّب ROL مع B3H في الأمثلة بالأسفل. ولا يدخل CF في الحلقة.','The top bit (0) re-enters from the right giving 66H and CF=0. The result equals SHL here only because the outgoing bit is 0; try ROL with B3H below. CF is not part of the ring.',{set:{AX:0x0033,CF:1}}),
+      P('ROR AL, 1','AL=84H: البت الأدنى (0) يدخل من اليسار فتصبح 42H و CF=0.','AL=84H: the lowest bit (0) re-enters from the left giving 42H and CF=0.',{set:{AX:0x0084}}),
+      P('RCR AL, 1','CF=1 و AL=84H: يدخل CF من اليسار فتصبح 1100 0010 = C2H و CF=0.','CF=1 and AL=84H: CF enters from the left giving 1100 0010 = C2H and CF=0.',{set:{AX:0x0084,CF:1}}),
+      P('SHL AL, CL','CL=2 و AL=B3H: إزاحتان لليسار: B3H = 1011 0011 تصبح CCH = 1100 1100 (ضاع البتان 1 و0 من اليسار وتدخل 00 من اليمين).','CL=2 and AL=B3H: two left shifts: B3H = 1011 0011 becomes CCH = 1100 1100 (the bits 1 and 0 are lost on the left, and 00 enters on the right).',{set:{AX:0x00B3,CX:2}}),
+      P('ROL AL, CL','نفس القيمة B3H مع تدويرتين: لا يضيع شيء، فتصبح CEH = 1100 1110 (البتان الخارجان 1 و0 دخلا من اليمين).','The same value B3H with two rotations: nothing is lost, giving CEH = 1100 1110 (the two bits that left, 1 and 0, re-entered on the right).',{set:{AX:0x00B3,CX:2}}),
+      P('RCL AL, CL','نفس القيمة مع CF=0: الحلقة تضم CF فتصبح CDH = 1100 1101.','The same value with CF=0: the ring includes CF, giving CDH = 1100 1101.',{set:{AX:0x00B3,CX:2}}),
+      P('SHR AL, CL','CL=2 و AL=85H: إزاحتان لليمين: 1000 0101 تصبح 0010 0001 = 21H (يدخل 00 من اليسار).','CL=2 and AL=85H: two right shifts: 1000 0101 becomes 0010 0001 = 21H (00 enters from the left).',{set:{AX:0x0085,CX:2}}),
+      P('SAR AL, CL','نفس القيمة 85H: يبقى بت الإشارة 1 فتصبح 1110 0001 = E1H.','The same value 85H: the sign bit 1 is preserved, giving 1110 0001 = E1H.',{set:{AX:0x0085,CX:2}}),
+      P('ROR AL, CL','تدويرتان لليمين: البتان الخارجان (1 ثم 0) يدخلان من اليسار فتصبح 0110 0001 = 61H.','Two right rotations: the two bits that left (1 then 0) re-enter from the left, giving 0110 0001 = 61H.',{set:{AX:0x0085,CX:2}}),
+      P('RCR AL, CL','نفس القيمة مع CF=0: الحلقة تضم CF فتصبح 1010 0001 = A1H.','The same value with CF=0: the ring includes CF, giving 1010 0001 = A1H.',{set:{AX:0x0085,CX:2}}),
+      P('SHR AX, CL','CL=3: قسمة AX=0100H على 8 فيصبح 0020H.','CL=3: dividing AX=0100H by 8 gives 0020H.',{set:{AX:0x0100,CX:3}}),
+      P('STC','ضبط CF=1 (ويقابلها CLC للتصفير و CMC للعكس).','Sets CF=1 (CLC clears it and CMC complements it).',{fresh:false}),
+      P('SHL AL, 3',null,null,{kind:'bad'})
+    ]});
+}
+
+const QUIZ=[
+ {q:'شنو نمط العنونة بالتعليمة MOV CL, DH ؟',o:['Immediate','Register','Direct','Based'],a:1,e:'الاثنين رجسترات، فالداتا موجودة بالرجستر نفسه = Register Addressing.'},
+ {q:'MOV AX, 0A9FH – شنو النمط؟',o:['Register','Direct','Immediate','Indexed'],a:2,e:'القيمة 0A9FH مكتوبة جزء من التعليمة نفسها = Immediate.'},
+ {q:'الـ 8086 عنده 20 Address Line، فيگدر يعنون كم ذاكرة؟',o:['64 KB','256 KB','1 MB','16 MB'],a:2,e:'2²⁰ = 1,048,576 بايت = 1MB.'},
+ {q:'إذا كانت DS = 2000H و Offset = 0150H، شكد الـ Physical Address؟',o:['2150H','20150H','21500H','02150H'],a:1,e:'PA = 2000H×10H + 0150H = 20000H + 0150H = 20150H.'},
+ {q:'MOV AX, [BP+DI] – أي Segment Register يُستخدم تلقائياً؟',o:['DS','ES','SS','CS'],a:2,e:'أي عنوان فيه BP يستخدم SS. الباقي (BX, SI, DI) يستخدم DS.'},
+ {q:'شنو النمط بالتعليمة MOV DX, [BX+SI+0AH] ؟',o:['Based','Indexed','Based Indexed','Register Indirect'],a:2,e:'عدنا base (BX) + index (SI) + displacement = Based Indexed.'},
+ {q:'ليش MOV DS, 10 غلط؟',o:['10 رقم سالب','ممنوع نحط رقم مباشر بـ Segment Register','DS للقراءة بس','لازم نكتبها MOV 10, DS'],a:1,e:'نحط الرقم بـ AX أول ثم MOV DS, AX.'},
+ {q:'SP = 2008H وسوينا PUSH BX. شكد يصير SP؟',o:['2009H','2008H','2006H','200AH'],a:2,e:'PUSH ينقص SP بـ 2 (الستاك ينمو للأسفل): 2008H − 2 = 2006H.'},
+ {q:'شنو الفرق بين LEA SI,[BX] و MOV SI,[BX] ؟',o:['ما في فرق','LEA تجيب العنوان EA، و MOV تجيب المحتوى','LEA أبطأ','MOV تجيب العنوان و LEA المحتوى'],a:1,e:'LEA SI,[BX] تحط قيمة BX نفسها بـ SI. MOV تروح للذاكرة وتجيب اللي مخزون هناك.'},
+ {q:'بعد تنفيذ SUB AL, AL (طرح قيمة من نفسها) أي علم يصبح 1؟',o:['CF','ZF','OF','SF'],a:1,e:'الناتج صفر دائماً فيصبح ZF=1، ولا يحدث استلاف فيبقى CF=0.'},
+ {q:'طول تعليمة MOV AX,5 ثلاثة بايتات، وكان IP=0000H. كم تصبح قيمة IP بعد مرحلة Fetch؟',o:['0000H','0001H','0003H','0005H'],a:2,e:'يزداد IP بطول التعليمة: 0000H + 3 = 0003H فيشير إلى التعليمة التالية.'},
+ {q:'إذا كانت AL = 20H فما قيمة AL بعد تنفيذ NOT AL؟',o:['20H','DFH','E0H','DEH'],a:1,e:'تقلب NOT كل البتات: <span class="fs">0010 0000 → 1101 1111 = DFH</span>.'},
+ {q:'ما قيمة AL بعد AND AL, BL إذا كانت AL=0FH و BL=79H؟',o:['09H','7FH','76H','0FH'],a:0,e:'0000 1111 AND 0111 1001 = 0000 1001 = 09H.'},
+ {q:'كانت AL=33H و CF=1. ما قيمة AL بعد RCL AL,1؟',o:['66H','67H','E6H','99H'],a:1,e:'يدخل CF (=1) من اليمين: <span class="fs">0011 0011 → 0110 0111 = 67H</span>، بينما تعطي ROL القيمة 66H.'},
+ {q:'أين يُخزَّن ناتج التعليمة MUL BL؟',o:['في AL فقط','في AX','في DX:AX','في BL'],a:1,e:'AX = AL × Src لأن ناتج ضرب بايتين يحتاج إلى 16 بتاً.'},
+ {q:'كانت AL=84H. ما قيمتها بعد SAR AL,1؟',o:['42H','C2H','08H','84H'],a:1,e:'تحفظ SAR بت الإشارة: <span class="fs">1000 0100 → 1100 0010 = C2H</span>، بينما تعطي SHR القيمة 42H.'},
+ {q:'IN AX, 34H كم بايت تقرا من البورت؟',o:['1 بايت','2 بايت (16-bit)','4 بايت','حسب DX'],a:1,e:'AX رجستر 16-bit، فتقرا Word كامل: AH و AL.'}
+];
+function secQuiz(el){
+  head(el,'اختبار سريع','17 سؤالاً من المحاضرات. اضغط على الجواب وشوف الشرح.');
+  el.insertAdjacentHTML('beforeend','<div class="card" id="qz"></div>');
+  const box=el.querySelector('#qz');let i=0,score=0;
+  function draw(){
+    if(i>=QUIZ.length){box.innerHTML=`<h3>النتيجة: ${score} من ${QUIZ.length}</h3><p>${score>=9?'🌟 ممتاز!':score>=6?'👍 زين، راجع الأسئلة اللي غلطت بيها.':'📚 راجع الأقسام وجرب مرة ثانية.'}</p><button class="btn" id="qr">أعد الاختبار</button>`;box.querySelector('#qr').onclick=()=>{i=0;score=0;draw()};return}
+    const q=QUIZ[i];
+    box.innerHTML=`<div class="bar"><i style="width:${i/QUIZ.length*100}%"></i></div><p class="mini">سؤال ${i+1} من ${QUIZ.length}</p><b>${q.q}</b><div class="opts">${q.o.map((o,k)=>`<button class="opt" data-k="${k}">${o}</button>`).join('')}</div><div id="qe"></div>`;
+    box.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{
+      const k=+b.dataset.k;box.querySelectorAll('.opt').forEach(x=>{x.disabled=true;if(+x.dataset.k===q.a)x.classList.add('ok')});
+      if(k===q.a)score++;else b.classList.add('no');
+      box.querySelector('#qe').innerHTML=`<div class="card soft">${k===q.a?'✔ صح! ':'✗ غلط. '}${q.e}</div><button class="btn" id="qn">${i+1<QUIZ.length?'السؤال التالي':'اعرض النتيجة'}</button>`;
+      box.querySelector('#qn').onclick=()=>{i++;draw()};
+    });
+  }
+  draw();
+}
+
+const SECTIONS=[
+ {id:'home',title:'الرئيسية',icon:'🏠',g:'',fn:secHome},
+ {id:'pa',title:'حساب Physical Address',icon:'🧮',g:'محاضرة 3 – Addressing Modes',fn:secPA,desc:'Segment × 10H + Offset بحركة'},
+ {id:'modes',title:'أنماط العنونة السبعة',icon:'🧭',g:'',fn:secModes,desc:'Register … Based Indexed'},
+ {id:'ex',title:'تمرين محلول',icon:'✍️',g:'',fn:secEx,desc:'جاوب بنفسك وتحقق'},
+ {id:'mov',title:'MOV',icon:'📤',g:'محاضرة 4 – Instruction Set',fn:secMov,desc:'نسخ البيانات'},
+ {id:'lim',title:'قيود MOV',icon:'⛔',g:'',fn:secLim,desc:'شنو ممنوع ولیش'},
+ {id:'xchg',title:'XCHG',icon:'🔄',g:'',fn:secXchg,desc:'تبديل المحتوى'},
+ {id:'stack',title:'PUSH / POP',icon:'📚',g:'',fn:secStack,desc:'الستاك و SP'},
+ {id:'lea',title:'LEA / LDS / LES',icon:'📍',g:'',fn:secLea,desc:'العنوان مقابل المحتوى'},
+ {id:'io',title:'IN / OUT',icon:'🔌',g:'',fn:secIO,desc:'CPU ← Port ← Device'},
+ {id:'arith',title:'الحساب: ADD / SUB / CMP',en:'Arithmetic: ADD / SUB / CMP',icon:'➕',g:'تعليمات الحساب والمنطق والإزاحة',gEn:'Arithmetic, Logic & Shift',fn:secArith,desc:'ADD ADC SUB SBB INC DEC CMP NEG'},
+ {id:'muldiv',title:'الضرب والقسمة',en:'Multiply & Divide',icon:'✖️',g:'',fn:secMulDiv,desc:'MUL IMUL DIV IDIV'},
+ {id:'logic',title:'التعليمات المنطقية',en:'Logical Instructions',icon:'🔣',g:'',fn:secLogic,desc:'NOT AND OR XOR TEST'},
+ {id:'shift',title:'الإزاحة والتدوير',en:'Shift & Rotate',icon:'↔️',g:'',fn:secShift,desc:'SHL SHR SAR RCL ROL ROR RCR'},
+ {id:'ip',title:'مؤشّر التعليمات IP',en:'Instruction Pointer (IP)',icon:'➡️',g:'إضافي – IP والأعلام',gEn:'Extra – IP & Flags',fn:secIP,desc:'Fetch ← IP ← Execute'},
+ {id:'flags',title:'سجل الأعلام Flags',en:'Flags Register',icon:'🚩',g:'',fn:secFlags,desc:'CF ZF SF OF PF AF + Jcc'},
+ {id:'quiz',title:'اختبار',icon:'🏆',g:'ختام',fn:secQuiz,desc:'17 سؤالاً'}
+];
+const built={};let curId='home';
+const BI=new Set(['ip','flags','arith','muldiv','logic','shift']);
+function renderNav(){
+  const nav=document.getElementById('nav');
+  nav.innerHTML='<h1>8086 تفاعلي</h1><div class="sub">Addressing Modes + Instruction Set</div>';
+  SECTIONS.forEach(s=>{
+    const en=LANG==='en';
+    const g=en&&s.gEn?s.gEn:s.g;
+    if(g)nav.insertAdjacentHTML('beforeend',`<div class="grp">${g}</div>`);
+    const b=document.createElement('button');b.dataset.id=s.id;b.textContent=`${s.icon}  ${en&&s.en?s.en:s.title}`;b.onclick=()=>show(s.id);if(s.id===curId)b.classList.add('on');nav.appendChild(b);
+  });
+}
+function show(id){
+  const main=document.getElementById('main');
+  main.querySelectorAll('section.sec').forEach(s=>s.hidden=true);
+  if(!built[id]){const s=document.createElement('section');s.className='sec';
+    if(LANG==='en'&&BI.has(id)){s.dir='ltr';s.lang='en'}
+    main.appendChild(s);built[id]=s;SECTIONS.find(x=>x.id===id).fn(s)}
+  built[id].hidden=false;curId=id;
+  document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.id===id));
+  try{history.replaceState(null,'','#'+id)}catch(e){}
+  window.scrollTo(0,0);
+}
+function setLang(l){
+  LANG=l;
+  [...BI].forEach(i=>{if(built[i]){built[i].remove();delete built[i]}});
+  renderNav();show(curId);
+}
+(function init(){
+  var bt=document.getElementById('boot');if(bt)bt.remove();
+  renderNav();
+  const h=location.hash.slice(1);
+  show(SECTIONS.some(s=>s.id===h)?h:'home');
+})();
+window.__t={analyze,newState,exAnswer,EX,H};
+</script>
+</body>
+</html>
+Displaying L3.pdf.
